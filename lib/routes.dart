@@ -8,7 +8,7 @@ class Routes {
     switch (settings.name) {
       case 'receipt':
         return MaterialPageRoute(
-            builder: ((context) => HomePage(title: 'Some title')));
+            builder: ((context) => ReceiptPage(title: 'Some title')));
 
       default:
         return _errorRoute(settings);

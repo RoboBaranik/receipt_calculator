@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/widgets/home/list_item.dart';
 
-class HomePage extends StatefulWidget {
+class ReceiptPage extends StatefulWidget {
   final String title;
   final List<ReceiptItem> receiptItems = [
     ReceiptItem(
@@ -34,13 +34,13 @@ class HomePage extends StatefulWidget {
     ReceiptItem(name: 'Unknown space object', value: 5432987),
   ];
 
-  HomePage({super.key, required this.title});
+  ReceiptPage({super.key, required this.title});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ReceiptPage> createState() => _ReceiptPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ReceiptPageState extends State<ReceiptPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
