@@ -1,10 +1,11 @@
-import 'dart:ui';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Helper {
-  static String locale = 'sk';
+  static String locale = Platform.localeName;
+  static const String currency = 'EUR';
   static int maxPeople = 10;
   static List<Color> colorPerPerson = [
     Colors.blue,
@@ -22,9 +23,15 @@ class Helper {
       NumberFormat.decimalPattern(Helper.locale);
   static NumberFormat a = NumberFormat.simpleCurrency();
 
-  static String valueWithCurrency(double value, String currency) {
+  static String dateTimeToString(DateTime time) {
+    return DateFormat('d. MMMM y HH:mm', Helper.locale).format(time);
+  }
+
+  static String valueWithCurrency(double value, String? currency) {
     NumberFormat format = NumberFormat.compactSimpleCurrency(
-        locale: Helper.locale, name: currency, decimalDigits: 2);
+        locale: Helper.locale,
+        name: currency ?? Helper.currency,
+        decimalDigits: 2);
     return format.format(value);
   }
 

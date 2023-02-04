@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:receipt_calculator/pages/home_page.dart';
+import 'package:receipt_calculator/pages/receipt_page.dart';
 import 'package:receipt_calculator/routes.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
+  initializeDateFormatting(Platform.localeName);
   runApp(const MyApp());
 }
 
@@ -26,7 +30,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.amber,
       ),
-      initialRoute: 'receipt',
+      initialRoute: Routes.receiptList,
       onGenerateRoute: Routes.generateRoute,
       // home: HomePage(title: 'Flutter Demo Home Page'),
       debugShowCheckedModeBanner: false,

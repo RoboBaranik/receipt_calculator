@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
@@ -22,7 +20,6 @@ class _PartitionProgressBarState extends State<PartitionProgressBar> {
   List<Expanded> _buildBarParts() {
     List<Expanded> parts = [];
     widget.partsPaid.asMap().forEach((index, part) {
-      // log('${part.percentPaid}% ${Helper.colorPerPerson.elementAt(index)}');
       if (index > 0) {
         parts.add(Expanded(
           flex: 1,
@@ -37,9 +34,6 @@ class _PartitionProgressBarState extends State<PartitionProgressBar> {
         child: Container(
           decoration: BoxDecoration(
             color: Helper.colorPerPerson.elementAt(index),
-            // border: Border.all(
-            //   color: Colors.transparent,
-            // ),
             borderRadius: BorderRadius.horizontal(
               left: index == 0 ? const Radius.circular(8) : Radius.zero,
               right: index + 1 == widget.partsPaid.length
@@ -55,7 +49,7 @@ class _PartitionProgressBarState extends State<PartitionProgressBar> {
   }
 
   Widget _buildBar(List<Expanded> parts) {
-    var core = parts.isEmpty
+    var core = parts.isEmpty && !widget.compact
         ? Container(height: widget.height())
         : Row(children: parts);
     if (widget.compact) {
@@ -82,13 +76,6 @@ class _PartitionProgressBarState extends State<PartitionProgressBar> {
           color: Colors.transparent,
           height: parts.isEmpty && !widget.compact ? widget.height() : 0,
         ),
-        // Expanded(
-        //   flex: 10,
-        //   child: Container(
-        //     color: Colors.black,
-        //     height: widget.height.toDouble(),
-        //   ),
-        // ),
         progressBar,
       ],
     );

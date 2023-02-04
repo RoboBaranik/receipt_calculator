@@ -1,3 +1,28 @@
+import 'package:flutter/material.dart';
+import 'package:receipt_calculator/helper.dart';
+
+class Receipt {
+  final String name;
+  String? currency;
+  final DateTime timeCreated;
+  final List<ReceiptItem> items;
+  Receipt(
+      {required this.name,
+      required this.items,
+      required this.timeCreated,
+      this.currency = Helper.currency});
+
+  double get sum {
+    if (items.isEmpty) return 0;
+    if (!items.every((element) => element.currency == items[0].currency)) {
+      debugPrint('Inconsistent currency!');
+    }
+    return items
+        .map((item) => item.value)
+        .reduce((value, element) => value + element);
+  }
+}
+
 class ReceiptItem {
   static const String defaultName = 'Unknown';
 
@@ -6,7 +31,6 @@ class ReceiptItem {
   final double value;
   final String currency;
   List<Partition> partsPaid = [];
-  // bool isExpanded = false;
 
   ReceiptItem(
       {this.name = ReceiptItem.defaultName,
