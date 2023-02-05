@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
 import 'package:receipt_calculator/routes.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
-  initializeDateFormatting(Platform.localeName);
+  // initializeDateFormatting(Platform.localeName);
   runApp(const MyApp());
 }
 
@@ -30,6 +31,15 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.amber,
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('sk', 'SK'),
+      ],
       initialRoute: Routes.receiptList,
       onGenerateRoute: Routes.generateRoute,
       // home: HomePage(title: 'Flutter Demo Home Page'),

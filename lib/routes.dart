@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receipt_calculator/pages/receipt_create_manual_page.dart';
 import 'package:receipt_calculator/pages/receipt_list_page.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
 
@@ -7,6 +8,7 @@ import 'data/receipt_item.dart';
 class Routes {
   static const String receipt = '/receipt';
   static const String receiptList = 'receipt_list';
+  static const String receiptCreateManual = '/receipt_create_manual';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments;
@@ -24,6 +26,12 @@ class Routes {
           pageBuilder: (context, _, __) => ReceiptListPage(
             receipts: [mocked1, mocked2],
           ),
+          transitionsBuilder: (_, a, __, c) =>
+              FadeTransition(opacity: a, child: c),
+        );
+      case receiptCreateManual:
+        return PageRouteBuilder(
+          pageBuilder: (context, _, __) => const ReceiptCreateManualPage(),
           transitionsBuilder: (_, a, __, c) =>
               FadeTransition(opacity: a, child: c),
         );

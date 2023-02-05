@@ -27,6 +27,17 @@ class Helper {
     return DateFormat('d. MMMM y HH:mm', Helper.locale).format(time);
   }
 
+  static Locale getLocale() {
+    var match = RegExp(r'^[a-z]{2,}_[A-Z]{2,}').firstMatch(locale);
+    if (match != null) {
+      var parts = match[0]?.split('_');
+      if (parts != null && parts.length > 1) {
+        return Locale(parts[0], parts[1]);
+      }
+    }
+    return Locale(locale.substring(0, 2));
+  }
+
   static String valueWithCurrency(double value, String? currency) {
     NumberFormat format = NumberFormat.compactSimpleCurrency(
         locale: Helper.locale,
@@ -41,7 +52,7 @@ class Helper {
     }
     String countSimple =
         NumberFormat.compact(locale: Helper.locale).format(count);
-    switch (Helper.locale) {
+    switch (Helper.locale.substring(0, 2)) {
       case 'sk':
         return '$countSimple ks';
       case 'en':

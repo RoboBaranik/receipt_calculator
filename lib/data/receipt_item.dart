@@ -18,7 +18,7 @@ class Receipt {
       debugPrint('Inconsistent currency!');
     }
     return items
-        .map((item) => item.value)
+        .map((item) => item.value * item.count)
         .reduce((value, element) => value + element);
   }
 }

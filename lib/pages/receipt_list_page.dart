@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
+import 'package:receipt_calculator/widgets/receipt_list/dialog_add.dart';
 
 import '../routes.dart';
 import '../widgets/drawer.dart';
@@ -25,6 +26,15 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
       appBar: AppBar(title: const Text('New Receipt list')),
       drawer: const Drawer(
         child: AppDrawer(currentRoute: Routes.receiptList),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await showDialog(
+            context: context,
+            builder: (_) => const DialogReceiptAdd(),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
       body: ListView.separated(
         itemCount: widget.receipts.length,
