@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -19,6 +20,7 @@ class Helper {
     Colors.indigo,
     Colors.green
   ];
+  static Map<String, String> langToCountMap = {'en': 'x', 'sk': 'ks'};
   static NumberFormat decimalFormat =
       NumberFormat.decimalPattern(Helper.locale);
   static NumberFormat a = NumberFormat.simpleCurrency();
@@ -47,17 +49,37 @@ class Helper {
   }
 
   static String countToString(int count) {
-    if (count <= 1) {
+    if (count == 1) {
       return '';
     }
     String countSimple =
         NumberFormat.compact(locale: Helper.locale).format(count);
+    var countSuffix = Helper.langToCount();
     switch (Helper.locale.substring(0, 2)) {
       case 'sk':
-        return '$countSimple ks';
+        return '$countSimple $countSuffix';
       case 'en':
       default:
-        return '${countSimple}x';
+        return '$countSimple$countSuffix';
+    }
+  }
+
+  static String langToCount() {
+    var count = Helper.langToCountMap[Helper.locale.substring(0, 2)];
+    return count ?? 'x';
+  }
+
+  static void expandableListControllerSetUp(
+      Iterable<ExpandableController> list) {
+    var indicies = List.generate(list.length, (index) => index);
+    for (var index in indicies) {
+      var others = indicies.where((element) => element != index);
+      list.elementAt(index).addListener(() {
+        if (!list.elementAt(index).value) return;
+        for (var element in others) {
+          list.elementAt(element).value = false;
+        }
+      });
     }
   }
 }

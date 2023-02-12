@@ -1,3 +1,4 @@
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/helper.dart';
 
@@ -45,6 +46,12 @@ class ReceiptItem {
   String toString() {
     return '$name ($count) = $value $currency';
   }
+}
+
+class ExpandableReceiptItem {
+  final ReceiptItem item;
+  final ExpandableController controller;
+  ExpandableReceiptItem({required this.item, required this.controller});
 }
 
 class Partition {

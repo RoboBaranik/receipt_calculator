@@ -6,12 +6,14 @@ import 'package:receipt_calculator/widgets/home/partition_progress_bar.dart';
 
 class ListItem extends StatelessWidget {
   final ReceiptItem item;
+  final ExpandableController controller;
 
-  const ListItem({super.key, required this.item});
+  const ListItem({super.key, required this.item, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
+      controller: controller,
       collapsed: Container(),
       expanded: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
         OutlinedButton.icon(
@@ -26,6 +28,7 @@ class ListItem extends StatelessWidget {
           label: const Text('Delete'),
           style: TextButton.styleFrom(foregroundColor: Colors.red),
         ),
+        const SizedBox(width: 8),
       ]),
       theme: const ExpandableThemeData(hasIcon: false, tapHeaderToExpand: true),
       header: Container(

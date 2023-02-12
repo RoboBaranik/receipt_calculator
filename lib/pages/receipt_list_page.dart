@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
-import 'package:receipt_calculator/widgets/receipt_list/dialog_add.dart';
+import 'package:receipt_calculator/widgets/receipt_list/dialog_receipt_add.dart';
 
 import '../routes.dart';
 import '../widgets/drawer.dart';
