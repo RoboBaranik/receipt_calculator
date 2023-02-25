@@ -1,10 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
-import 'package:receipt_calculator/routes.dart';
-import 'package:receipt_calculator/widgets/drawer.dart';
-import 'package:receipt_calculator/widgets/home/list_item.dart';
+import 'package:receipt_calculator/widgets/receipt/list_item.dart';
 
 class ReceiptPage extends StatefulWidget {
   final Receipt receipt;

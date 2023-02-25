@@ -53,11 +53,14 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
       lastDate: DateTime(3000),
       locale: Helper.getLocale(),
     ).then((date) {
+      if (date == null) {
+        return;
+      }
       showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       ).then((time) {
-        _timeCreated.text = date != null && time != null
+        _timeCreated.text = time != null
             ? Helper.dateTimeToString(DateTime(
                 date.year, date.month, date.day, time.hour, time.minute))
             : '';
@@ -67,9 +70,9 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
 
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((_) =>
-    //     _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-    //         duration: const Duration(seconds: 2), curve: Curves.fastOutSlowIn));
+    WidgetsBinding.instance.addPostFrameCallback((_) =>
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            duration: const Duration(seconds: 2), curve: Curves.fastOutSlowIn));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create new receipt')),
@@ -82,6 +85,7 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
               child: TextFormField(
                 controller: _name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
                 decoration: const InputDecoration(
                   isDense: true,
                   labelText: 'Store name',

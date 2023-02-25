@@ -2,7 +2,6 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
-import 'package:receipt_calculator/widgets/home/partition_progress_bar.dart';
 
 class ListItem extends StatelessWidget {
   final ReceiptItem item;

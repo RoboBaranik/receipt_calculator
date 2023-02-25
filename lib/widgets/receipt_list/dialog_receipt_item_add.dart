@@ -1,8 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
 
