@@ -6,8 +6,15 @@ import 'package:receipt_calculator/helper.dart';
 class ListItem extends StatelessWidget {
   final ReceiptItem item;
   final ExpandableController controller;
+  final Function onEdit;
+  final Function onDelete;
 
-  const ListItem({super.key, required this.item, required this.controller});
+  const ListItem(
+      {super.key,
+      required this.item,
+      required this.controller,
+      required this.onEdit,
+      required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +23,17 @@ class ListItem extends StatelessWidget {
       collapsed: Container(),
       expanded: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            onEdit.call();
+          },
           icon: const Icon(Icons.edit),
           label: const Text('Edit'),
         ),
         const SizedBox(width: 8),
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            onDelete.call();
+          },
           icon: const Icon(Icons.delete),
           label: const Text('Delete'),
           style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -32,7 +43,7 @@ class ListItem extends StatelessWidget {
       theme: const ExpandableThemeData(hasIcon: false, tapHeaderToExpand: true),
       header: Container(
         color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

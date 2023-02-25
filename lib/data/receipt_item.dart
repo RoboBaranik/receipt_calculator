@@ -27,9 +27,9 @@ class Receipt {
 class ReceiptItem {
   static const String defaultName = 'Unknown';
 
-  final String name;
-  final int count;
-  final double value;
+  String name;
+  int count;
+  double value;
   final String currency;
   List<Partition> partsPaid = [];
 
@@ -40,6 +40,11 @@ class ReceiptItem {
       this.currency = 'EUR',
       List<Partition>? partsPaid}) {
     this.partsPaid = partsPaid ?? [];
+  }
+  void update(String name, int count, double value) {
+    this.name = name;
+    this.count = count;
+    this.value = value;
   }
 
   @override

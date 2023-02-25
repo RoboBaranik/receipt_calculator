@@ -5,7 +5,18 @@ import 'package:receipt_calculator/helper.dart';
 
 class DialogReceiptItemAdd extends StatelessWidget {
   final bool isCreate;
-  DialogReceiptItemAdd({super.key, required this.isCreate});
+  DialogReceiptItemAdd(
+      {super.key,
+      required this.isCreate,
+      String? name,
+      int? count,
+      double? value}) {
+    if (!isCreate) {
+      nameController.text = name ?? '';
+      countController.text = count != null ? count.toString() : '';
+      valueController.text = value != null ? value.toStringAsFixed(2) : '';
+    }
+  }
   final TextEditingController nameController = TextEditingController();
   final TextEditingController countController = TextEditingController();
   final TextEditingController valueController = TextEditingController();
@@ -120,7 +131,7 @@ class DialogReceiptItemAdd extends StatelessWidget {
                             count: int.tryParse(countController.text) ?? 1,
                             value: double.tryParse(valueController.text) ?? 0));
                   },
-                  child: const Text('Create item'),
+                  child: Text(isCreate ? 'Create item' : 'Edit item'),
                 ),
               ],
             )

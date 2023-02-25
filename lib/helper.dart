@@ -70,7 +70,10 @@ class Helper {
   }
 
   static void expandableListControllerSetUp(
-      Iterable<ExpandableController> list) {
+      ScrollController listScroll, Iterable<ExpandableController> list) {
+    if (list.isEmpty) {
+      return;
+    }
     var indicies = List.generate(list.length, (index) => index);
     for (var index in indicies) {
       var others = indicies.where((element) => element != index);
@@ -81,5 +84,23 @@ class Helper {
         }
       });
     }
+    list.last.addListener(() {
+      if (list.last.value) {
+        listScroll.jumpTo(listScroll.position.maxScrollExtent - 1);
+        // listScroll.jumpTo(listScroll.position.maxScrollExtent);
+        listScroll.animateTo(listScroll.position.maxScrollExtent + 1000,
+            duration: const Duration(seconds: 1, milliseconds: 500),
+            curve: Curves.fastOutSlowIn);
+      }
+    });
+  }
+
+  static void expandableListControllerSetUpRevert(
+      Iterable<ExpandableController> list) {
+    var indicies = List.generate(list.length, (index) => index);
+    for (var index in indicies) {
+      list.elementAt(index).removeListener(() {});
+    }
+    list.last.removeListener(() {});
   }
 }

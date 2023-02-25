@@ -25,7 +25,7 @@ class ListItem extends StatelessWidget {
       theme: const ExpandableThemeData(hasIcon: false, tapHeaderToExpand: true),
       header: Container(
         color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

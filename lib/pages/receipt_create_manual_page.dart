@@ -27,21 +27,19 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
   //   for (var key in Routes.mocked1.items) key: ExpandableController()
   // };
   _ReceiptCreateManualPageState() {
-    Helper.expandableListControllerSetUp(items.map((e) => e.controller));
+    Helper.expandableListControllerSetUp(
+        _scrollController, items.map((e) => e.controller));
   }
   updateControllers() {
-    for (var element in items.map((e) => e.controller)) {
-      element.removeListener(() {});
-    }
-    Helper.expandableListControllerSetUp(items.map((e) => e.controller));
+    Helper.expandableListControllerSetUpRevert(items.map((e) => e.controller));
+    Helper.expandableListControllerSetUp(
+        _scrollController, items.map((e) => e.controller));
   }
 
   @override
   void dispose() {
     super.dispose();
-    for (var element in items.map((e) => e.controller)) {
-      element.removeListener(() {});
-    }
+    Helper.expandableListControllerSetUpRevert(items.map((e) => e.controller));
   }
 
   void getDateAndTime() {
@@ -118,8 +116,11 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
               child: ListView.separated(
                   controller: _scrollController,
                   itemBuilder: (context, index) => ListItem(
-                      item: items[index].item,
-                      controller: items[index].controller),
+                        item: items[index].item,
+                        controller: items[index].controller,
+                        onEdit: () => onEditItem(index),
+                        onDelete: () => debugPrint('Delete of $index'),
+                      ),
                   separatorBuilder: (context, index) =>
                       Container(height: 1, color: Colors.black12),
                   itemCount: items.length),
@@ -169,6 +170,36 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         items.add(ExpandableReceiptItem(
             item: newReceiptItem, controller: ExpandableController()));
         updateControllers();
+      });
+    });
+  }
+
+  void onEditItem(int index) {
+    if (items.isEmpty || index < 0 || index >= items.length) {
+      return;
+    }
+    var item = items[index].item;
+    showDialog<ReceiptItem>(
+      context: context,
+      builder: (_) => DialogReceiptItemAdd(
+        isCreate: false,
+        name: item.name,
+        count: item.count,
+        value: item.value,
+      ),
+    ).then((editedReceiptItem) {
+      if (editedReceiptItem == null) {
+        debugPrint('Item edit canceled');
+        return;
+      }
+      debugPrint('Edited item #$index: $editedReceiptItem');
+      setState(() {
+        item.update(editedReceiptItem.name, editedReceiptItem.count,
+            editedReceiptItem.value);
+        items[index].controller.value = false;
+        // items.add(ExpandableReceiptItem(
+        //     item: editedReceiptItem, controller: ExpandableController()));
+        // updateControllers();
       });
     });
   }
