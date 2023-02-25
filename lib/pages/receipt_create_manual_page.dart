@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
 import 'package:receipt_calculator/routes.dart';
-import 'package:receipt_calculator/widgets/receipt_list/dialog_receipt_item_add.dart';
-import 'package:receipt_calculator/widgets/receipt_list/list_item.dart';
+import 'package:receipt_calculator/widgets/receipt_create_manual/dialog_receipt_item_add.dart';
+import 'package:receipt_calculator/widgets/receipt_create_manual/list_item.dart';
 
 class ReceiptCreateManualPage extends StatefulWidget {
   const ReceiptCreateManualPage({super.key});
@@ -81,15 +81,16 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         key: _formKey,
         child: Column(
           children: [
+            //
+            //
+            // Text inputs
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
               child: TextFormField(
                 controller: _name,
                 style: const TextStyle(fontWeight: FontWeight.bold),
                 decoration: const InputDecoration(
-                  isDense: true,
-                  labelText: 'Store name',
-                ),
+                    isDense: true, labelText: 'Store name'),
                 validator: (String? value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter some text';
@@ -104,27 +105,28 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
                 controller: _timeCreated,
                 readOnly: true,
                 decoration: const InputDecoration(
-                  isDense: true,
-                  labelText: 'Date created',
-                ),
+                    isDense: true, labelText: 'Date created'),
                 onTap: () {
                   getDateAndTime();
                 },
               ),
             ),
+            //
+            //
+            // Item list
             Expanded(
               child: ListView.separated(
                   controller: _scrollController,
                   itemBuilder: (context, index) => ListItem(
-                        item: items[index].item,
-                        controller: items[index].controller,
-                      ),
-                  separatorBuilder: (context, index) => Container(
-                        height: 1,
-                        color: Colors.black12,
-                      ),
+                      item: items[index].item,
+                      controller: items[index].controller),
+                  separatorBuilder: (context, index) =>
+                      Container(height: 1, color: Colors.black12),
                   itemCount: items.length),
             ),
+            //
+            //
+            // Bottom buttons
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
@@ -132,26 +134,12 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => DialogReceiptItemAdd(isCreate: true),
-                      ).then((newReceiptItem) {
-                        if (newReceiptItem == null) {
-                          debugPrint('Item creation canceled');
-                          return;
-                        }
-                        debugPrint('Created item: $newReceiptItem');
-                        setState(() {
-                          items.add(ExpandableReceiptItem(
-                              item: newReceiptItem,
-                              controller: ExpandableController()));
-                          updateControllers();
-                        });
-                      });
+                      onAddItem(context);
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Add item'),
-                    style: TextButton.styleFrom(backgroundColor: Colors.green),
+                    style: TextButton.styleFrom(
+                        backgroundColor: Colors.lime.shade700),
                   ),
                   ElevatedButton.icon(
                     onPressed: () {},
@@ -165,5 +153,23 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         ),
       ),
     );
+  }
+
+  void onAddItem(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => DialogReceiptItemAdd(isCreate: true),
+    ).then((newReceiptItem) {
+      if (newReceiptItem == null) {
+        debugPrint('Item creation canceled');
+        return;
+      }
+      debugPrint('Created item: $newReceiptItem');
+      setState(() {
+        items.add(ExpandableReceiptItem(
+            item: newReceiptItem, controller: ExpandableController()));
+        updateControllers();
+      });
+    });
   }
 }
