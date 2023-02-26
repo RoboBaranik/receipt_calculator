@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/routes.dart';
 
+import '../../data/receipt_item.dart';
+
 class DialogReceiptAdd extends StatelessWidget {
   const DialogReceiptAdd({super.key});
 
@@ -29,8 +31,14 @@ class DialogReceiptAdd extends StatelessWidget {
                 icon: const Icon(Icons.qr_code),
                 label: const Text('Scan QR code')),
             OutlinedButton.icon(
-                onPressed: () => Navigator.popAndPushNamed(
-                    context, Routes.receiptCreateManual),
+                onPressed: () {
+                  Navigator.pushNamed(context, Routes.receiptCreateManual)
+                      .then((createdReceipt) {
+                    if (createdReceipt != null) {
+                      Navigator.pop(context, createdReceipt);
+                    }
+                  });
+                },
                 icon: const Icon(Icons.create),
                 label: const Text('Fill manually')),
           ],

@@ -22,6 +22,11 @@ class Receipt {
         .map((item) => item.value * item.count)
         .reduce((value, element) => value + element);
   }
+
+  @override
+  String toString() {
+    return 'Store "$name" from ${Helper.dateTimeToString(timeCreated)} with ${items.length} items in $currency.';
+  }
 }
 
 class ReceiptItem {

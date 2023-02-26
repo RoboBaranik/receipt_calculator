@@ -28,11 +28,17 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
         child: AppDrawer(currentRoute: Routes.receiptList),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await showDialog(
+        onPressed: () {
+          showDialog<Receipt>(
             context: context,
             builder: (_) => const DialogReceiptAdd(),
-          );
+          ).then((createdReceipt) {
+            if (createdReceipt != null) {
+              debugPrint('New receipt $createdReceipt');
+              widget.receipts.add(createdReceipt);
+              setState(() {});
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),
@@ -42,6 +48,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
           onTap: () => Navigator.pushNamed(context, Routes.receipt,
               arguments: widget.receipts[index]),
           child: Container(
+            decoration: const BoxDecoration(color: Colors.white),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             height: 64,
             child: Row(

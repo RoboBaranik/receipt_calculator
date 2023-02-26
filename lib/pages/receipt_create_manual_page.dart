@@ -15,6 +15,8 @@ class ReceiptCreateManualPage extends StatefulWidget {
 }
 
 class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
+  _ActionType _actionType = _ActionType.initial;
+  _ReceiptForm formData = _ReceiptForm();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _timeCreated = TextEditingController();
@@ -58,25 +60,32 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         context: context,
         initialTime: TimeOfDay.now(),
       ).then((time) {
-        _timeCreated.text = time != null
-            ? Helper.dateTimeToString(DateTime(
-                date.year, date.month, date.day, time.hour, time.minute))
-            : '';
+        if (time != null) {
+          DateTime dateTime =
+              DateTime(date.year, date.month, date.day, time.hour, time.minute);
+          formData.timeCreated = dateTime;
+          _timeCreated.text = Helper.dateTimeToString(dateTime);
+        }
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            duration: const Duration(seconds: 2), curve: Curves.fastOutSlowIn));
+    if (_actionType == _ActionType.initial ||
+        _actionType == _ActionType.onItemAdded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollController
+          .animateTo(_scrollController.position.maxScrollExtent,
+              duration: const Duration(seconds: 2),
+              curve: Curves.fastOutSlowIn));
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create new receipt')),
       backgroundColor: Colors.white,
       body: Form(
         key: _formKey,
+        autovalidateMode: AutovalidateMode.always,
         child: Column(
           children: [
             //
@@ -95,6 +104,7 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
                   }
                   return null;
                 },
+                onChanged: (change) => formData.name = change,
               ),
             ),
             Container(
@@ -119,7 +129,7 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
                         item: items[index].item,
                         controller: items[index].controller,
                         onEdit: () => onEditItem(index),
-                        onDelete: () => debugPrint('Delete of $index'),
+                        onDelete: () => onDeleteItem(index),
                       ),
                   separatorBuilder: (context, index) =>
                       Container(height: 1, color: Colors.black12),
@@ -143,7 +153,11 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
                         backgroundColor: Colors.lime.shade700),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      formData.items = items.map((e) => e.item).toList();
+                      onCreateReceipt(context, formData.name,
+                          formData.timeCreated, formData.items);
+                    },
                     icon: const Icon(Icons.create_sharp),
                     label: const Text('Create'),
                   ),
@@ -154,6 +168,22 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         ),
       ),
     );
+  }
+
+  void onCreateReceipt(BuildContext context, String? name,
+      DateTime? timeCreated, List<ReceiptItem>? items) {
+    if (name == null ||
+        name.isEmpty ||
+        timeCreated == null ||
+        items == null ||
+        items.isEmpty) {
+      debugPrint(
+          'Form data not filled. Name $name, timeCreated $timeCreated, items $items');
+      return;
+    }
+    Receipt newReceipt =
+        Receipt(name: name, items: items, timeCreated: timeCreated);
+    Navigator.pop(context, newReceipt);
   }
 
   void onAddItem(BuildContext context) {
@@ -167,9 +197,13 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
       }
       debugPrint('Created item: $newReceiptItem');
       setState(() {
-        items.add(ExpandableReceiptItem(
-            item: newReceiptItem, controller: ExpandableController()));
-        updateControllers();
+        onItemAction(() {
+          items.add(ExpandableReceiptItem(
+              item: newReceiptItem, controller: ExpandableController()));
+        }, _ActionType.onItemAdded);
+        // items.add(ExpandableReceiptItem(
+        //     item: newReceiptItem, controller: ExpandableController()));
+        // updateControllers();
       });
     });
   }
@@ -193,6 +227,7 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         return;
       }
       debugPrint('Edited item #$index: $editedReceiptItem');
+      _actionType = _ActionType.onItemEdited;
       setState(() {
         item.update(editedReceiptItem.name, editedReceiptItem.count,
             editedReceiptItem.value);
@@ -203,4 +238,56 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
       });
     });
   }
+
+  void onDeleteItem(int index) {
+    if (items.isEmpty || index < 0 || index >= items.length) {
+      return;
+    }
+    ExpandableReceiptItem removedItem = onItemAction(() {
+      return items.removeAt(index);
+    }, _ActionType.onItemDeleted);
+    // Helper.expandableListControllerSetUpRevert(items.map((e) => e.controller));
+    // var removedItem = items.removeAt(index);
+    // Helper.expandableListControllerSetUp(
+    //     _scrollController, items.map((e) => e.controller));
+    debugPrint('Item removed');
+    final snackBar = SnackBar(
+      content: const Text('Item deleted'),
+      duration: const Duration(seconds: 3),
+      action: SnackBarAction(
+        label: 'Undo',
+        onPressed: () {
+          removedItem.controller.value = false;
+          onItemAction(() => items.insert(index, removedItem),
+              _ActionType.onItemDeleted);
+          // Helper.expandableListControllerSetUpRevert(
+          //     items.map((e) => e.controller));
+          // items.insert(index, removedItem);
+          // Helper.expandableListControllerSetUp(
+          //     _scrollController, items.map((e) => e.controller));
+          debugPrint('Item removal reverted');
+          setState(() {});
+        },
+      ),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    setState(() {});
+  }
+
+  T onItemAction<T>(T Function() action, _ActionType actionType) {
+    _actionType = actionType;
+    Helper.expandableListControllerSetUpRevert(items.map((e) => e.controller));
+    T result = action();
+    Helper.expandableListControllerSetUp(
+        _scrollController, items.map((e) => e.controller));
+    return result;
+  }
+}
+
+enum _ActionType { initial, onItemAdded, onItemEdited, onItemDeleted }
+
+class _ReceiptForm {
+  String? name;
+  DateTime? timeCreated;
+  List<ReceiptItem>? items;
 }
