@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/pages/receipt_create_manual_page.dart';
 import 'package:receipt_calculator/pages/receipt_list_page.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
@@ -60,11 +61,11 @@ class Routes {
     ReceiptItem(
       name: 'Ketchup',
       partsPaid: [
-        Partition(person: 'A', percentPaid: 10),
-        Partition(person: 'B', percentPaid: 50),
-        Partition(person: 'C', percentPaid: 20),
-        Partition(person: 'D', percentPaid: 5),
-        Partition(person: 'E', percentPaid: 25),
+        Partition(person: Person('A'), payment: 10),
+        Partition(person: Person('B'), payment: 50),
+        Partition(person: Person('C'), payment: 20),
+        Partition(person: Person('D'), payment: 5),
+        Partition(person: Person('E'), payment: 25),
       ],
     ),
     ReceiptItem(name: 'Milk'),
@@ -91,11 +92,11 @@ class Routes {
         ReceiptItem(
           name: 'Ketchup',
           partsPaid: [
-            Partition(person: 'A', percentPaid: 10),
-            Partition(person: 'B', percentPaid: 50),
-            Partition(person: 'C', percentPaid: 20),
-            Partition(person: 'D', percentPaid: 5),
-            Partition(person: 'E', percentPaid: 25),
+            Partition(person: Person('A'), payment: 10),
+            Partition(person: Person('B'), payment: 50),
+            Partition(person: Person('C'), payment: 20),
+            Partition(person: Person('D'), payment: 5),
+            Partition(person: Person('E'), payment: 25),
           ],
         ),
       ]);

@@ -30,7 +30,8 @@ class _PartitionProgressBarState extends State<PartitionProgressBar> {
         ));
       }
       parts.add(Expanded(
-        flex: part.percentPaid * 2,
+        flex: ReceiptItem.getPartitionPercent(index, widget.partsPaid).round() *
+            2,
         child: Container(
           decoration: BoxDecoration(
             color: Helper.colorPerPerson.elementAt(index),

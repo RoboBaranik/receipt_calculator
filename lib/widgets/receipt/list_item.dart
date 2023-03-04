@@ -8,6 +8,13 @@ class ListItem extends StatelessWidget {
   final ReceiptItem item;
 
   const ListItem({super.key, required this.item});
+  Color getTextColor() {
+    if (item.partsPaid.isNotEmpty) {
+      return Colors.black;
+    } else {
+      return Colors.black54;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,24 +41,23 @@ class ListItem extends StatelessWidget {
               child: Text(
                 item.name,
                 textAlign: TextAlign.left,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: getTextColor()),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             Expanded(
               flex: 2,
-              child: Text(
-                Helper.countToString(item.count),
-                textAlign: TextAlign.center,
-              ),
+              child: Text(Helper.countToString(item.count),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: getTextColor())),
             ),
             Expanded(
               flex: 2,
-              child: Text(
-                Helper.valueWithCurrency(item.value, item.currency),
-                textAlign: TextAlign.right,
-              ),
+              child: Text(Helper.valueWithCurrency(item.value, item.currency),
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: getTextColor())),
             ),
           ],
         ),
