@@ -23,7 +23,16 @@ class Helper {
   static Map<String, String> langToCountMap = {'en': 'x', 'sk': 'ks'};
   static NumberFormat decimalFormat =
       NumberFormat.decimalPattern(Helper.locale);
-  static NumberFormat a = NumberFormat.simpleCurrency();
+  static NumberFormat currencyFormatter(String? currency) =>
+      NumberFormat.simpleCurrency(
+          locale: Helper.locale,
+          name: currency ?? Helper.currency,
+          decimalDigits: 2);
+  static NumberFormat currencyFormatterCompact(String? currency) =>
+      NumberFormat.compactSimpleCurrency(
+          locale: Helper.locale,
+          name: currency ?? Helper.currency,
+          decimalDigits: 2);
 
   static String dateTimeToString(DateTime time) {
     return DateFormat('d. MMMM y HH:mm', Helper.locale).format(time);
@@ -40,12 +49,25 @@ class Helper {
     return Locale(locale.substring(0, 2));
   }
 
-  static String valueWithCurrency(double value, String? currency) {
-    NumberFormat format = NumberFormat.compactSimpleCurrency(
-        locale: Helper.locale,
-        name: currency ?? Helper.currency,
-        decimalDigits: 2);
-    return format.format(value);
+  static String valueShortWithCurrency(double value, String? currency) {
+    if (value < 1000) {
+      return Helper._valueWithCurrency(
+          value, currency, Helper.currencyFormatter(currency));
+    }
+    return Helper._valueWithCurrency(
+        value, currency, Helper.currencyFormatterCompact(currency));
+  }
+
+  static String valueLongWithCurrency(double value, String? currency) {
+    return Helper._valueWithCurrency(
+        value, currency, Helper.currencyFormatter(currency));
+  }
+
+  static String _valueWithCurrency(
+      double value, String? currency, NumberFormat formatter) {
+    double fixedValue = (value * 100).round() / 100;
+    if (fixedValue < 1000) {}
+    return formatter.format(fixedValue);
   }
 
   static String countToString(int count) {

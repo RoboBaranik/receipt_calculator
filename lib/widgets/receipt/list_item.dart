@@ -55,7 +55,8 @@ class ListItem extends StatelessWidget {
             ),
             Expanded(
               flex: 2,
-              child: Text(Helper.valueWithCurrency(item.value, item.currency),
+              child: Text(
+                  Helper.valueShortWithCurrency(item.value, item.currency),
                   textAlign: TextAlign.right,
                   style: TextStyle(color: getTextColor())),
             ),

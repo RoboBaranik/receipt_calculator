@@ -45,7 +45,9 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
       body: ListView.separated(
         itemCount: widget.receipts.length,
         itemBuilder: (context, index) => GestureDetector(
-          onTap: () => Navigator.pushNamed(context, Routes.receipt,
+          // onTap: () => Navigator.pushNamed(context, Routes.receipt,
+          //     arguments: widget.receipts[index]),
+          onTap: () => Navigator.pushNamed(context, Routes.receiptSummary,
               arguments: widget.receipts[index]),
           child: Container(
             decoration: const BoxDecoration(color: Colors.white),
@@ -79,7 +81,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
                   ],
                 ),
                 Text(
-                  Helper.valueWithCurrency(widget.receipts[index].sum,
+                  Helper.valueShortWithCurrency(widget.receipts[index].sum,
                       widget.receipts[index].currency),
                   style: const TextStyle(fontSize: 16),
                 )

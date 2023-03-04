@@ -3,12 +3,14 @@ import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/pages/receipt_create_manual_page.dart';
 import 'package:receipt_calculator/pages/receipt_list_page.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
+import 'package:receipt_calculator/pages/receipt_summary_page.dart';
 
 import 'data/receipt_item.dart';
 
 class Routes {
-  static const String receipt = '/receipt';
   static const String receiptList = 'receipt_list';
+  static const String receiptSummary = '/receipt_summary';
+  static const String receipt = '/receipt';
   static const String receiptCreateManual = '/receipt_create_manual';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -33,6 +35,13 @@ class Routes {
       case receiptCreateManual:
         return PageRouteBuilder(
           pageBuilder: (context, _, __) => const ReceiptCreateManualPage(),
+          transitionsBuilder: (_, a, __, c) =>
+              FadeTransition(opacity: a, child: c),
+        );
+      case receiptSummary:
+        return PageRouteBuilder(
+          pageBuilder: (context, _, __) => ReceiptSummaryPage(
+              receipt: args != null ? args as Receipt : mocked1),
           transitionsBuilder: (_, a, __, c) =>
               FadeTransition(opacity: a, child: c),
         );
@@ -88,9 +97,10 @@ class Routes {
       name: 'Fresh',
       timeCreated: DateTime(2019, 9, 11, 12, 50, 0),
       items: [
-        ReceiptItem(name: 'Milk'),
+        ReceiptItem(name: 'Milk', value: 4.53),
         ReceiptItem(
           name: 'Ketchup',
+          value: 110,
           partsPaid: [
             Partition(person: Person('A'), payment: 10),
             Partition(person: Person('B'), payment: 50),
