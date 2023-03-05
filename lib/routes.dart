@@ -65,48 +65,59 @@ class Routes {
     }));
   }
 
-  static Receipt mocked1 =
-      Receipt(name: 'LIDL', timeCreated: DateTime.now(), items: [
-    ReceiptItem(
-      name: 'Ketchup',
-      partsPaid: [
-        Partition(person: Person('A'), payment: 10),
-        Partition(person: Person('B'), payment: 50),
-        Partition(person: Person('C'), payment: 20),
-        Partition(person: Person('D'), payment: 5),
-        Partition(person: Person('E'), payment: 25),
-      ],
-    ),
-    ReceiptItem(name: 'Milk'),
-    ReceiptItem(name: 'Chips'),
-    ReceiptItem(name: 'Yoghurt'),
-    ReceiptItem(name: 'Green apple', count: 5),
-    ReceiptItem(name: 'Strawberry', count: 120, value: 5),
-    ReceiptItem(
-        name: 'Intel Core i5-12600K 3.5 GHz, 8-Core',
-        count: 54321,
-        value: 1234),
-    ReceiptItem(name: 'Small mirror', value: 200),
-    ReceiptItem(name: 'Coffee cup', value: 50),
-    ReceiptItem(name: 'Roll', count: 4321),
-    ReceiptItem(name: 'Book', value: 15),
-    ReceiptItem(name: 'Better book', value: 15.01),
-    ReceiptItem(name: 'Unknown space object', value: 5432987),
+  static ReceiptGroup mockedGroup = ReceiptGroup(members: [
+    Person('Abraham'),
+    Person('Betty'),
+    Person('Cindy'),
+    Person('Derek'),
+    Person('Eustace')
   ]);
+  static Receipt mocked1 = Receipt(
+      name: 'LIDL',
+      timeCreated: DateTime.now(),
+      group: mockedGroup,
+      items: [
+        ReceiptItem(
+          name: 'Ketchup',
+          partsPaid: [
+            Partition(person: Person('Abraham'), payment: 10),
+            Partition(person: Person('Betty'), payment: 50),
+            Partition(person: Person('Cindy'), payment: 20),
+            Partition(person: Person('Derek'), payment: 5),
+            Partition(person: Person('Eustace'), payment: 25),
+          ],
+        ),
+        ReceiptItem(name: 'Milk'),
+        ReceiptItem(name: 'Chips'),
+        ReceiptItem(name: 'Yoghurt'),
+        ReceiptItem(name: 'Green apple', count: 5),
+        ReceiptItem(name: 'Strawberry', count: 120, value: 5),
+        ReceiptItem(
+            name: 'Intel Core i5-12600K 3.5 GHz, 8-Core',
+            count: 54321,
+            value: 1234),
+        ReceiptItem(name: 'Small mirror', value: 200),
+        ReceiptItem(name: 'Coffee cup', value: 50),
+        ReceiptItem(name: 'Roll', count: 4321),
+        ReceiptItem(name: 'Book', value: 15),
+        ReceiptItem(name: 'Better book', value: 15.01),
+        ReceiptItem(name: 'Unknown space object', value: 5432987),
+      ]);
   static Receipt mocked2 = Receipt(
       name: 'Fresh',
       timeCreated: DateTime(2019, 9, 11, 12, 50, 0),
+      group: mockedGroup,
       items: [
         ReceiptItem(name: 'Milk', value: 4.53),
         ReceiptItem(
           name: 'Ketchup',
           value: 110,
           partsPaid: [
-            Partition(person: Person('A'), payment: 10),
-            Partition(person: Person('B'), payment: 50),
-            Partition(person: Person('C'), payment: 20),
-            Partition(person: Person('D'), payment: 5),
-            Partition(person: Person('E'), payment: 25),
+            Partition(person: Person('Abraham'), payment: 10),
+            Partition(person: Person('Betty'), payment: 50),
+            Partition(person: Person('Cindy'), payment: 20),
+            Partition(person: Person('Derek'), payment: 5),
+            Partition(person: Person('Eustace'), payment: 25),
           ],
         ),
       ]);

@@ -181,8 +181,11 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
           'Form data not filled. Name $name, timeCreated $timeCreated, items $items');
       return;
     }
-    Receipt newReceipt =
-        Receipt(name: name, items: items, timeCreated: timeCreated);
+    Receipt newReceipt = Receipt(
+        name: name,
+        items: items,
+        timeCreated: timeCreated,
+        group: Routes.mockedGroup);
     Navigator.pop(context, newReceipt);
   }
 

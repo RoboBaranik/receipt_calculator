@@ -5,6 +5,7 @@ import 'package:receipt_calculator/helper.dart';
 import 'package:collection/collection.dart';
 
 class Receipt {
+  ReceiptGroup group;
   final String name;
   String? currency;
   final DateTime timeCreated;
@@ -13,6 +14,7 @@ class Receipt {
       {required this.name,
       required this.items,
       required this.timeCreated,
+      required this.group,
       this.currency = Helper.currency});
 
   double get sum {
@@ -39,6 +41,18 @@ class Receipt {
         })
         .values
         .toList();
+  }
+
+  double getMembersPaymentSum(List<Person> members) {
+    return items
+        .expand((item) => item.partsPaid)
+        .where((partition) => members.contains(partition.person))
+        .map((partition) => partition.payment)
+        .sum;
+  }
+
+  double assignedPercent() {
+    return getMembersPaymentSum(group.members) / (sum / 100);
   }
 
   @override
