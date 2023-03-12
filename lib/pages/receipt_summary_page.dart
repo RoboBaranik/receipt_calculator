@@ -1,6 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
+import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
+import 'package:receipt_calculator/routes.dart';
 
 class ReceiptSummaryPage extends StatefulWidget {
   final Receipt receipt;
@@ -12,18 +15,9 @@ class ReceiptSummaryPage extends StatefulWidget {
 }
 
 class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
+  Person? paidBy;
   @override
   Widget build(BuildContext context) {
-    var totalSumBackground = List<Color>.generate(100, (i) {
-      var assign = widget.receipt.assignedPercent();
-      if (assign > 0 &&
-          (i < 10 || assign >= i + 1) &&
-          (i < 90 || assign >= 100)) {
-        return Theme.of(context).primaryColor.withOpacity(0.7);
-      } else {
-        return Theme.of(context).scaffoldBackgroundColor;
-      }
-    });
     List<Partition> memberPayments =
         widget.receipt.getMembersPartitions(widget.receipt.group.members);
     return Scaffold(
@@ -47,34 +41,73 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
           children: [
             Align(
               alignment: Alignment.center,
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Theme.of(context).primaryColor, width: 4),
-                    gradient: LinearGradient(colors: totalSumBackground),
-                    borderRadius: const BorderRadius.all(Radius.circular(10))),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                child: Column(
-                  children: [
-                    Text('Total'.toUpperCase()),
-                    Text(
-                      Helper.valueLongWithCurrency(widget.receipt.sum, null),
-                      style: const TextStyle(fontSize: 32),
-                    ),
-                  ],
-                ),
-              ),
+              child: buildPaymentProgress(),
             ),
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
             Table(
               defaultColumnWidth: const IntrinsicColumnWidth(),
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
               children: buildMemberPayments(memberPayments, context),
             ),
+            const SizedBox(height: 16),
+            // Text(
+            //   'Paid by:',
+            //   style: TextStyle(
+            //       fontSize: 12, color: Theme.of(context).primaryColor),
+            // ),
+            DropdownButtonFormField<Person>(
+                hint: const Text('Receipt paid by ...'),
+                value: paidBy,
+                items: widget.receipt.group.members
+                    .map((person) => DropdownMenuItem<Person>(
+                          value: person,
+                          child: Text(person.name),
+                        ))
+                    .toList(),
+                onChanged: (personNew) {
+                  setState(() {
+                    paidBy = personNew!;
+                  });
+                }),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, Routes.receipt,
+                      arguments: widget.receipt);
+                },
+                icon: const Icon(Icons.groups),
+                label: const Text('Split')),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildPaymentProgress() {
+    var totalSumBackground = List<Color>.generate(100, (i) {
+      var assign = widget.receipt.assignedPercent();
+      if (assign > 0 &&
+          (i < 10 || assign >= i + 1) &&
+          (i < 90 || assign >= 100)) {
+        return Theme.of(context).primaryColor.withOpacity(0.7);
+      } else {
+        return Theme.of(context).scaffoldBackgroundColor;
+      }
+    });
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).primaryColor, width: 4),
+          gradient: LinearGradient(colors: totalSumBackground),
+          borderRadius: const BorderRadius.all(Radius.circular(10))),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Column(
+        children: [
+          Text('Total'.toUpperCase()),
+          Text(
+            Helper.valueLongWithCurrency(widget.receipt.sum, null),
+            style: const TextStyle(fontSize: 32),
+          ),
+        ],
       ),
     );
   }
@@ -84,37 +117,43 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
     double assignedSum =
         widget.receipt.getMembersPaymentSum(widget.receipt.group.members);
     List<TableRow> payments = memberPayments
-        .map<TableRow>((Partition payment) => TableRow(children: [
-              Text(
-                '${payment.person.name}:',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 4),
-              Text(Helper.valueLongWithCurrency(payment.payment, null))
-            ]))
+        .mapIndexed<TableRow>(
+            (int index, Partition payment) => TableRow(children: [
+                  Icon(
+                    Icons.person,
+                    color: Helper.colorPerPerson[index % 10],
+                    shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
+                  ),
+                  Text(
+                    '${payment.person.name}:',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(Helper.valueLongWithCurrency(payment.payment, null))
+                ]))
         .toList();
-    payments.add(TableRow(children: [
-      Text(
-        'Assigned'.toUpperCase(),
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(
-        width: 4,
-      ),
-      Text(
-        Helper.valueLongWithCurrency(assignedSum, null),
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    ]));
+    payments.add(TableRow(
+        decoration: const BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.black))),
+        children: [
+          const Icon(Icons.functions),
+          Text(
+            'Assigned'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            width: 4,
+          ),
+          Text(
+            Helper.valueLongWithCurrency(assignedSum, null),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ]));
     if (widget.receipt.sum > assignedSum) {
       payments.add(TableRow(children: [
-        const Text(
-          'Missing',
-          style: TextStyle(color: Colors.red),
-        ),
-        const SizedBox(
-          width: 4,
-        ),
+        const Icon(Icons.error_outline, color: Colors.red),
+        const Text('Missing', style: TextStyle(color: Colors.red)),
+        const SizedBox(width: 4),
         Text(
           Helper.valueLongWithCurrency(widget.receipt.sum - assignedSum, null),
           style:
