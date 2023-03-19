@@ -128,8 +128,8 @@ class DialogReceiptItemAdd extends StatelessWidget {
                         context,
                         ReceiptItem(
                             name: nameController.text,
-                            count: int.tryParse(countController.text) ?? 1,
-                            value: double.tryParse(valueController.text) ?? 0));
+                            quantity: int.tryParse(countController.text) ?? 1,
+                            price: double.tryParse(valueController.text) ?? 0));
                   },
                   child: Text(isCreate ? 'Create item' : 'Edit item'),
                 ),

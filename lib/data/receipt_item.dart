@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
 import 'package:collection/collection.dart';
+import 'package:receipt_calculator/routes.dart';
 
 class Receipt {
+  final String id;
   ReceiptGroup group;
   final String name;
   String? currency;
@@ -15,14 +17,34 @@ class Receipt {
       required this.items,
       required this.timeCreated,
       required this.group,
+      required this.id,
       this.currency = Helper.currency});
+  static Receipt fromJson(Map<String, dynamic> json) {
+    String name = json['receipt']['unit']['name'] ??
+        json['receipt']['organization']['name'] ??
+        'Store';
+    DateTime timeCreated = DateTime.tryParse(json['receipt']['issueDate']) ??
+        DateTime.tryParse(json['receipt']['createDate']) ??
+        DateTime.now();
+    ReceiptGroup group = Routes.mockedGroup;
+    String id = json['receipt']['receiptId'] ?? '';
+    List<ReceiptItem> items = (json['receipt']['items'] as List<dynamic>)
+        .map((item) => ReceiptItem.fromJson(item))
+        .toList();
+    return Receipt(
+        name: name,
+        items: items,
+        timeCreated: timeCreated,
+        group: group,
+        id: id);
+  }
 
   double get sum {
     if (items.isEmpty) return 0;
     if (!items.every((element) => element.currency == items[0].currency)) {
       debugPrint('Inconsistent currency!');
     }
-    return items.map((item) => item.value * item.count).sum;
+    return items.map((item) => item.price).sum;
   }
 
   double getMemberSum(Person member) {
@@ -65,23 +87,28 @@ class ReceiptItem {
   static const String defaultName = 'Unknown';
 
   String name;
-  int count;
-  double value;
+  int quantity;
+  double price;
   final String currency;
   List<Partition> partsPaid = [];
 
   ReceiptItem(
       {this.name = ReceiptItem.defaultName,
-      this.count = 1,
-      this.value = 0.0,
+      this.quantity = 1,
+      this.price = 0.0,
       this.currency = 'EUR',
       List<Partition>? partsPaid}) {
     this.partsPaid = partsPaid ?? [];
   }
-  void update(String name, int count, double value) {
+  static ReceiptItem fromJson(Map<String, dynamic> json) {
+    return ReceiptItem(
+        name: json['name'], quantity: json['quantity'], price: json['price']);
+  }
+
+  void update(String name, int quantity, double price) {
     this.name = name;
-    this.count = count;
-    this.value = value;
+    this.quantity = quantity;
+    this.price = price;
   }
 
   double getMemberPayment(Person member) {
@@ -100,7 +127,7 @@ class ReceiptItem {
 
   @override
   String toString() {
-    return '$name ($count) = $value $currency';
+    return '$name ($quantity) = $price $currency';
   }
 }
 

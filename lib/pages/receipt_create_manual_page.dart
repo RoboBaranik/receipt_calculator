@@ -185,7 +185,8 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         name: name,
         items: items,
         timeCreated: timeCreated,
-        group: Routes.mockedGroup);
+        group: Routes.mockedGroup,
+        id: '');
     Navigator.pop(context, newReceipt);
   }
 
@@ -221,8 +222,8 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
       builder: (_) => DialogReceiptItemAdd(
         isCreate: false,
         name: item.name,
-        count: item.count,
-        value: item.value,
+        count: item.quantity,
+        value: item.price,
       ),
     ).then((editedReceiptItem) {
       if (editedReceiptItem == null) {
@@ -232,8 +233,8 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
       debugPrint('Edited item #$index: $editedReceiptItem');
       _actionType = _ActionType.onItemEdited;
       setState(() {
-        item.update(editedReceiptItem.name, editedReceiptItem.count,
-            editedReceiptItem.value);
+        item.update(editedReceiptItem.name, editedReceiptItem.quantity,
+            editedReceiptItem.price);
         items[index].controller.value = false;
         // items.add(ExpandableReceiptItem(
         //     item: editedReceiptItem, controller: ExpandableController()));

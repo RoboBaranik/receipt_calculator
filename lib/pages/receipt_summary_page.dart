@@ -6,6 +6,7 @@ import 'package:receipt_calculator/helper.dart';
 import 'package:receipt_calculator/routes.dart';
 
 class ReceiptSummaryPage extends StatefulWidget {
+  static const String route = '/receipt_summary';
   final Receipt receipt;
 
   const ReceiptSummaryPage({super.key, required this.receipt});
@@ -20,6 +21,7 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
   Widget build(BuildContext context) {
     List<Partition> memberPayments =
         widget.receipt.getMembersPartitions(widget.receipt.group.members);
+    debugPrint(widget.receipt.id);
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -77,6 +79,10 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
                 },
                 icon: const Icon(Icons.groups),
                 label: const Text('Split')),
+            Text(
+              'UID: ${widget.receipt.id}',
+              style: const TextStyle(fontSize: 10),
+            ),
           ],
         ),
       ),
@@ -132,6 +138,7 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
                   Text(Helper.valueLongWithCurrency(payment.payment, null))
                 ]))
         .toList();
+    // SUM
     payments.add(TableRow(
         decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Colors.black))),
@@ -149,6 +156,7 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ]));
+    // Missing
     if (widget.receipt.sum > assignedSum) {
       payments.add(TableRow(children: [
         const Icon(Icons.error_outline, color: Colors.red),

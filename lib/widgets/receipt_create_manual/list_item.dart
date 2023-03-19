@@ -60,14 +60,14 @@ class ListItem extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Text(
-                Helper.countToString(item.count),
+                Helper.countToString(item.quantity),
                 textAlign: TextAlign.center,
               ),
             ),
             Expanded(
               flex: 2,
               child: Text(
-                Helper.valueShortWithCurrency(item.value, item.currency),
+                Helper.valueShortWithCurrency(item.price, item.currency),
                 textAlign: TextAlign.right,
               ),
             ),

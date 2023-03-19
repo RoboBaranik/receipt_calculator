@@ -3,6 +3,7 @@ import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/pages/receipt_create_manual_page.dart';
 import 'package:receipt_calculator/pages/receipt_list_page.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
+import 'package:receipt_calculator/pages/receipt_scanner_page.dart';
 import 'package:receipt_calculator/pages/receipt_summary_page.dart';
 
 import 'data/receipt_item.dart';
@@ -19,32 +20,28 @@ class Routes {
     switch (settings.name) {
       case receipt:
         return PageRouteBuilder(
-          pageBuilder: (context, _, __) =>
-              ReceiptPage(receipt: args != null ? args as Receipt : mocked1),
-          transitionsBuilder: (_, a, __, c) =>
-              FadeTransition(opacity: a, child: c),
-        );
+            pageBuilder: (context, _, __) =>
+                ReceiptPage(receipt: args != null ? args as Receipt : mocked1),
+            transitionsBuilder: transition);
       case receiptList:
         return PageRouteBuilder(
-          pageBuilder: (context, _, __) => ReceiptListPage(
-            receipts: [mocked1, mocked2],
-          ),
-          transitionsBuilder: (_, a, __, c) =>
-              FadeTransition(opacity: a, child: c),
-        );
+            pageBuilder: (context, _, __) => ReceiptListPage(
+                  receipts: [mocked1, mocked2],
+                ),
+            transitionsBuilder: transition);
       case receiptCreateManual:
         return PageRouteBuilder(
-          pageBuilder: (context, _, __) => const ReceiptCreateManualPage(),
-          transitionsBuilder: (_, a, __, c) =>
-              FadeTransition(opacity: a, child: c),
-        );
+            pageBuilder: (context, _, __) => const ReceiptCreateManualPage(),
+            transitionsBuilder: transition);
       case receiptSummary:
         return PageRouteBuilder(
-          pageBuilder: (context, _, __) => ReceiptSummaryPage(
-              receipt: args != null ? args as Receipt : mocked1),
-          transitionsBuilder: (_, a, __, c) =>
-              FadeTransition(opacity: a, child: c),
-        );
+            pageBuilder: (context, _, __) => ReceiptSummaryPage(
+                receipt: args != null ? args as Receipt : mocked1),
+            transitionsBuilder: transition);
+      case ReceiptScannerPage.route:
+        return PageRouteBuilder(
+            pageBuilder: (context, _, __) => const ReceiptScannerPage(),
+            transitionsBuilder: transition);
 
       default:
         return _errorRoute(settings);
@@ -65,6 +62,10 @@ class Routes {
     }));
   }
 
+  static Widget transition(BuildContext bc, Animation<double> a1,
+          Animation<double> a2, Widget child) =>
+      FadeTransition(opacity: a1, child: child);
+
   static ReceiptGroup mockedGroup = ReceiptGroup(members: [
     Person('Abraham'),
     Person('Betty'),
@@ -73,6 +74,7 @@ class Routes {
     Person('Eustace')
   ]);
   static Receipt mocked1 = Receipt(
+      id: 'empty',
       name: 'LIDL',
       timeCreated: DateTime.now(),
       group: mockedGroup,
@@ -90,28 +92,29 @@ class Routes {
         ReceiptItem(name: 'Milk'),
         ReceiptItem(name: 'Chips'),
         ReceiptItem(name: 'Yoghurt'),
-        ReceiptItem(name: 'Green apple', count: 5),
-        ReceiptItem(name: 'Strawberry', count: 120, value: 5),
+        ReceiptItem(name: 'Green apple', quantity: 5),
+        ReceiptItem(name: 'Strawberry', quantity: 120, price: 5),
         ReceiptItem(
             name: 'Intel Core i5-12600K 3.5 GHz, 8-Core',
-            count: 54321,
-            value: 1234),
-        ReceiptItem(name: 'Small mirror', value: 200),
-        ReceiptItem(name: 'Coffee cup', value: 50),
-        ReceiptItem(name: 'Roll', count: 4321),
-        ReceiptItem(name: 'Book', value: 15),
-        ReceiptItem(name: 'Better book', value: 15.01),
-        ReceiptItem(name: 'Unknown space object', value: 5432987),
+            quantity: 54321,
+            price: 1234),
+        ReceiptItem(name: 'Small mirror', price: 200),
+        ReceiptItem(name: 'Coffee cup', price: 50),
+        ReceiptItem(name: 'Roll', quantity: 4321),
+        ReceiptItem(name: 'Book', price: 15),
+        ReceiptItem(name: 'Better book', price: 15.01),
+        ReceiptItem(name: 'Unknown space object', price: 5432987),
       ]);
   static Receipt mocked2 = Receipt(
+      id: 'empty',
       name: 'Fresh',
       timeCreated: DateTime(2019, 9, 11, 12, 50, 0),
       group: mockedGroup,
       items: [
-        ReceiptItem(name: 'Milk', value: 4.53),
+        ReceiptItem(name: 'Milk', price: 4.53),
         ReceiptItem(
           name: 'Ketchup',
-          value: 110,
+          price: 110,
           partsPaid: [
             Partition(person: Person('Abraham'), payment: 10),
             Partition(person: Person('Betty'), payment: 50),

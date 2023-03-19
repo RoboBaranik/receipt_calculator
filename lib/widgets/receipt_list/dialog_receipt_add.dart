@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receipt_calculator/pages/receipt_scanner_page.dart';
 import 'package:receipt_calculator/routes.dart';
 
 import '../../data/receipt_item.dart';
@@ -27,7 +28,14 @@ class DialogReceiptAdd extends StatelessWidget {
               ),
             ),
             ElevatedButton.icon(
-                onPressed: () => {},
+                onPressed: () {
+                  Navigator.pushNamed(context, ReceiptScannerPage.route)
+                      .then((createdReceipt) {
+                    if (createdReceipt != null) {
+                      Navigator.pop(context, createdReceipt);
+                    }
+                  });
+                },
                 icon: const Icon(Icons.qr_code),
                 label: const Text('Scan QR code')),
             OutlinedButton.icon(

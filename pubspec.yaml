@@ -40,6 +40,8 @@ dependencies:
   intl: ^0.17.0
   expandable: ^5.0.1
   collection: ^1.16.0
+  qr_code_scanner: ^1.0.1
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:
