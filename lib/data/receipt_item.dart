@@ -23,8 +23,8 @@ class Receipt {
     String name = json['receipt']['unit']['name'] ??
         json['receipt']['organization']['name'] ??
         'Store';
-    DateTime timeCreated = DateTime.tryParse(json['receipt']['issueDate']) ??
-        DateTime.tryParse(json['receipt']['createDate']) ??
+    DateTime timeCreated = Helper.jsonDateParse(json['receipt']['issueDate']) ??
+        Helper.jsonDateParse(json['receipt']['createDate']) ??
         DateTime.now();
     ReceiptGroup group = Routes.mockedGroup;
     String id = json['receipt']['receiptId'] ?? '';
@@ -101,8 +101,15 @@ class ReceiptItem {
     this.partsPaid = partsPaid ?? [];
   }
   static ReceiptItem fromJson(Map<String, dynamic> json) {
+    var q = json['quantity'];
+    int quantity = 1;
+    if (q is int) {
+      quantity = q;
+    } else if (q is double) {
+      quantity = q.floor();
+    }
     return ReceiptItem(
-        name: json['name'], quantity: json['quantity'], price: json['price']);
+        name: json['name'], quantity: quantity, price: json['price']);
   }
 
   void update(String name, int quantity, double price) {

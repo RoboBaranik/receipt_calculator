@@ -4,6 +4,7 @@ import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
 import 'package:receipt_calculator/routes.dart';
+import 'package:receipt_calculator/widgets/receipt_summary/dialog_person_add.dart';
 
 class ReceiptSummaryPage extends StatefulWidget {
   static const String route = '/receipt_summary';
@@ -57,20 +58,44 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
             //   style: TextStyle(
             //       fontSize: 12, color: Theme.of(context).primaryColor),
             // ),
-            DropdownButtonFormField<Person>(
-                hint: const Text('Receipt paid by ...'),
-                value: paidBy,
-                items: widget.receipt.group.members
-                    .map((person) => DropdownMenuItem<Person>(
-                          value: person,
-                          child: Text(person.name),
-                        ))
-                    .toList(),
-                onChanged: (personNew) {
-                  setState(() {
-                    paidBy = personNew!;
-                  });
-                }),
+            Row(
+              children: [
+                Expanded(
+                    child: DropdownButtonFormField<Person>(
+                        hint: const Text('Receipt paid by ...'),
+                        value: paidBy,
+                        items: widget.receipt.group.members
+                            .map((person) => DropdownMenuItem<Person>(
+                                  value: person,
+                                  child: Text(
+                                    person.name,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (personNew) {
+                          setState(() {
+                            paidBy = personNew!;
+                          });
+                        })),
+                const SizedBox(width: 4),
+                IconButton(
+                    onPressed: () {
+                      showDialog<Person>(
+                        context: context,
+                        builder: (_) => DialogPersonAdd(isCreate: true),
+                      ).then((createdPerson) {
+                        if (createdPerson != null) {
+                          debugPrint('New person $createdPerson');
+                          widget.receipt.group.members.add(createdPerson);
+                          setState(() {});
+                        }
+                      });
+                    },
+                    icon: const Icon(Icons.add))
+              ],
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
                 onPressed: () {

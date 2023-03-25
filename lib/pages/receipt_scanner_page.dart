@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert' as convert;
 
@@ -114,6 +115,18 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
                           child: const Text('resume',
                               style: TextStyle(fontSize: 20)),
                         ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.all(8),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            result = null;
+                            lastCode = '';
+                            setState(() {});
+                          },
+                          child: const Text('Reset',
+                              style: TextStyle(fontSize: 20)),
+                        ),
                       )
                     ],
                   ),
@@ -153,42 +166,37 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
       controller.resumeCamera();
     });
     controller.scannedDataStream.listen((scanData) {
-      debugPrint(scanData.code);
       if (scanData.code == null ||
           scanData.code!.trim().isEmpty ||
           lastCode.compareTo(scanData.code!) == 0) {
+        debugPrint('QRcode empty or same, not updating: ${scanData.code}');
         return;
       }
-      lastCode = scanData.code!;
-      debugPrint(lastCode);
-      if (RegExp(r'^[A-Z]-[A-Z0-9]{32}$').hasMatch(lastCode)) {
-        debugPrint(convert.jsonEncode({'receiptId': lastCode}));
-        post(
-                Uri.https(
-                    'ekasa.financnasprava.sk', '/mdu/api/v1/opd/receipt/find'),
-                body: convert.jsonEncode({'receiptId': lastCode}),
-                headers: {'Content-Type': 'application/json'})
-            .then((receiptResponse) {
-          debugPrint('Status code: ${receiptResponse.statusCode}');
-          var receipt =
-              convert.jsonDecode(receiptResponse.body) as Map<String, dynamic>;
-          debugPrint(receipt.toString());
-          controller.dispose();
-          lastCode = '';
-          Navigator.pushReplacementNamed(bc, ReceiptSummaryPage.route,
-              arguments: Receipt.fromJson(receipt));
-        }, onError: (err) => debugPrint(err.toString()));
-        // var receipt =
-        //     convert.jsonDecode(getMockResponse()) as Map<String, dynamic>;
-        // debugPrint(receipt.toString());
-        // controller.dispose();
-        // lastCode = '';
-        // Navigator.pushReplacementNamed(bc, ReceiptSummaryPage.route,
-        //     arguments: Receipt.fromJson(receipt));
-      } else {
-        debugPrint('Invalid QR code');
+      if (!RegExp(r'^[A-Z]-[A-Z0-9]{32}$').hasMatch(scanData.code!)) {
+        debugPrint('QRcode invalid, not updating: ${scanData.code}');
+        return;
       }
+      debugPrint('QRcode 1: ${scanData.code}');
+      lastCode = scanData.code!;
+
+      debugPrint(convert.jsonEncode({'receiptId': lastCode}));
+      post(Uri.https('ekasa.financnasprava.sk', '/mdu/api/v1/opd/receipt/find'),
+              body: convert.jsonEncode({'receiptId': lastCode}),
+              headers: {'Content-Type': 'application/json'})
+          .then((receiptResponse) {
+        debugPrint('Status code: ${receiptResponse.statusCode}');
+        var receipt =
+            convert.jsonDecode(receiptResponse.body) as Map<String, dynamic>;
+        log(receipt.toString());
+        // debugPrint(receipt.toString());
+        controller.dispose();
+        lastCode = '';
+        Navigator.pushReplacementNamed(bc, ReceiptSummaryPage.route,
+            arguments: Receipt.fromJson(receipt));
+      }, onError: (err) => debugPrint(err.toString()));
+
       // setState(() {
+      //   debugPrint('QRcode 2: ${scanData.code}');
       //   result = scanData;
       // });
     });

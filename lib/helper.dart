@@ -38,6 +38,15 @@ class Helper {
     return DateFormat('d. MMMM y HH:mm', Helper.locale).format(time);
   }
 
+  static DateTime? jsonDateParse(String time) {
+    try {
+      return DateFormat('dd.MM.yyyy HH:mm:ss', Helper.locale).parse(time);
+    } catch (e) {
+      debugPrint('Not able to parse $time');
+      return null;
+    }
+  }
+
   static Locale getLocale() {
     var match = RegExp(r'^[a-z]{2,}_[A-Z]{2,}').firstMatch(locale);
     if (match != null) {
