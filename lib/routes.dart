@@ -4,6 +4,7 @@ import 'package:receipt_calculator/pages/receipt_create_manual_page.dart';
 import 'package:receipt_calculator/pages/receipt_list_page.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
 import 'package:receipt_calculator/pages/receipt_scanner_page.dart';
+import 'package:receipt_calculator/pages/receipt_split_page.dart';
 import 'package:receipt_calculator/pages/receipt_summary_page.dart';
 
 import 'data/receipt_item.dart';
@@ -42,6 +43,15 @@ class Routes {
         return PageRouteBuilder(
             pageBuilder: (context, _, __) => const ReceiptScannerPage(),
             transitionsBuilder: transition);
+      case ReceiptSplitPage.route:
+        if (args == null || args is! Map<String, dynamic>) {
+          debugPrint(args.toString());
+          return _errorRoute(settings);
+        }
+        return PageRouteBuilder(
+            pageBuilder: (context, _, __) => ReceiptSplitPage(
+                receipt: args['receipt'], itemIndex: args['itemIndex']),
+            transitionsBuilder: transition);
 
       default:
         return _errorRoute(settings);
@@ -67,11 +77,11 @@ class Routes {
       FadeTransition(opacity: a1, child: child);
 
   static ReceiptGroup mockedGroup = ReceiptGroup(members: [
-    Person('Abraham'),
-    Person('Betty'),
-    Person('Cindy'),
-    Person('Derek'),
-    Person('Eustace')
+    Person('Abraham Asertive'),
+    Person('Betty Bored'),
+    Person('Cindy Clever'),
+    Person('DerekDetermined'),
+    Person('Eustace Exhausted')
   ]);
   static Receipt mocked1 = Receipt(
       id: 'empty',
@@ -82,11 +92,11 @@ class Routes {
         ReceiptItem(
           name: 'Ketchup',
           partsPaid: [
-            Partition(person: Person('Abraham'), payment: 10),
-            Partition(person: Person('Betty'), payment: 50),
-            Partition(person: Person('Cindy'), payment: 20),
-            Partition(person: Person('Derek'), payment: 5),
-            Partition(person: Person('Eustace'), payment: 25),
+            Partition(person: Person('Abraham Asertive'), payment: 10),
+            Partition(person: Person('Betty Bored'), payment: 50),
+            Partition(person: Person('Cindy Clever'), payment: 20),
+            Partition(person: Person('DerekDetermined'), payment: 5),
+            Partition(person: Person('Eustace Exhausted'), payment: 25),
           ],
         ),
         ReceiptItem(name: 'Milk'),
@@ -116,11 +126,11 @@ class Routes {
           name: 'Ketchup',
           price: 110,
           partsPaid: [
-            Partition(person: Person('Abraham'), payment: 10),
-            Partition(person: Person('Betty'), payment: 50),
-            Partition(person: Person('Cindy'), payment: 20),
-            Partition(person: Person('Derek'), payment: 5),
-            Partition(person: Person('Eustace'), payment: 25),
+            Partition(person: Person('Abraham Asertive'), payment: 10),
+            Partition(person: Person('Betty Bored'), payment: 50),
+            Partition(person: Person('Cindy Clever'), payment: 20),
+            Partition(person: Person('DerekDetermined'), payment: 5),
+            Partition(person: Person('Eustace Exhausted'), payment: 25),
           ],
         ),
       ]);

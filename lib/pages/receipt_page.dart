@@ -19,7 +19,7 @@ class _ReceiptPageState extends State<ReceiptPage> {
       body: ListView.separated(
         itemCount: widget.receipt.items.length,
         itemBuilder: (context, index) =>
-            ListItem(item: widget.receipt.items.elementAt(index)),
+            ListItem(receipt: widget.receipt, itemIndex: index),
         separatorBuilder: (context, index) => Container(
           height:
               widget.receipt.items.elementAt(index).partsPaid.isEmpty ? 1 : 0,

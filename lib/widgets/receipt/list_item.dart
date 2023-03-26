@@ -2,12 +2,16 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/helper.dart';
+import 'package:receipt_calculator/pages/receipt_split_page.dart';
 import 'package:receipt_calculator/widgets/receipt/partition_progress_bar.dart';
 
 class ListItem extends StatelessWidget {
+  final Receipt receipt;
+  final int itemIndex;
   final ReceiptItem item;
 
-  const ListItem({super.key, required this.item});
+  ListItem({super.key, required this.receipt, required this.itemIndex})
+      : item = receipt.items[itemIndex];
   Color getTextColor() {
     if (item.partsPaid.isNotEmpty) {
       return Colors.black;
@@ -28,6 +32,13 @@ class ListItem extends StatelessWidget {
           partsPaid: item.partsPaid,
           compact: false,
         ),
+        ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, ReceiptSplitPage.route,
+                      arguments: {'receipt': receipt, 'itemIndex': itemIndex})
+                  .then((value) => debugPrint(value.toString()));
+            },
+            child: const Text('Split'))
       ]),
       theme: const ExpandableThemeData(hasIcon: false, tapHeaderToExpand: true),
       header: Container(

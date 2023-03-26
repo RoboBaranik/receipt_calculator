@@ -49,46 +49,41 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                    Text('${result!.code}')
                   else
-                    const Text('Scan a code'),
+                    const Text('Scan the QR code on the receipt'),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Container(
                         margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.toggleFlash();
-                              setState(() {});
+                        child: IconButton(
+                          icon: FutureBuilder(
+                            future: controller?.getFlashStatus(),
+                            builder: (context, snapshot) {
+                              return snapshot.data != null && snapshot.data!
+                                  ? const Icon(Icons.flash_on)
+                                  : const Icon(Icons.flash_off);
                             },
-                            child: FutureBuilder(
-                              future: controller?.getFlashStatus(),
-                              builder: (context, snapshot) {
-                                return Text('Flash: ${snapshot.data}');
-                              },
-                            )),
+                          ),
+                          onPressed: () async {
+                            await controller?.toggleFlash();
+                            setState(() {});
+                          },
+                        ),
                       ),
                       Container(
                         margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                            onPressed: () async {
-                              await controller?.flipCamera();
-                              setState(() {});
-                            },
-                            child: FutureBuilder(
-                              future: controller?.getCameraInfo(),
-                              builder: (context, snapshot) {
-                                if (snapshot.data != null) {
-                                  return Text(
-                                      'Camera facing ${describeEnum(snapshot.data!)}');
-                                } else {
-                                  return const Text('loading');
-                                }
-                              },
-                            )),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            result = null;
+                            lastCode = '';
+                            setState(() {});
+                          },
+                          child: const Text('Reset',
+                              style: TextStyle(fontSize: 20)),
+                        ),
                       )
                     ],
                   ),
@@ -99,35 +94,20 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
                       Container(
                         margin: const EdgeInsets.all(8),
                         child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.pauseCamera();
-                          },
-                          child: const Text('pause',
+                          onPressed: result == null
+                              ? null
+                              : () {
+                                  var receipt =
+                                      convert.jsonDecode(getMockResponse())
+                                          as Map<String, dynamic>;
+                                  Navigator.pushReplacementNamed(
+                                      context, ReceiptSummaryPage.route,
+                                      arguments: Receipt.fromJson(receipt));
+                                },
+                          child: const Text('Confirm',
                               style: TextStyle(fontSize: 20)),
                         ),
                       ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await controller?.resumeCamera();
-                          },
-                          child: const Text('resume',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.all(8),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            result = null;
-                            lastCode = '';
-                            setState(() {});
-                          },
-                          child: const Text('Reset',
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                      )
                     ],
                   ),
                 ],
@@ -149,7 +129,8 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
     // we need to listen for Flutter SizeChanged notification and update controller
     return QRView(
       key: qrKey,
-      onQRViewCreated: (controller) => _onQRViewCreated(controller, context),
+      onQRViewCreated:
+          _onQRViewCreated, //(controller) => _onQRViewCreated(controller, context),
       overlay: QrScannerOverlayShape(
           borderColor: Colors.red,
           borderRadius: 10,
@@ -157,15 +138,20 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
           borderWidth: 10,
           cutOutSize: scanArea),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+      formatsAllowed: const [BarcodeFormat.qrcode],
     );
   }
 
-  void _onQRViewCreated(QRViewController controller, BuildContext bc) {
+  void _onQRViewCreated(QRViewController controller /* , BuildContext bc */) {
+    debugPrint('QR view created');
     setState(() {
       this.controller = controller;
-      controller.resumeCamera();
+      debugPrint('QR controller created');
+      // controller.resumeCamera();
     });
+    debugPrint('QR listener');
     controller.scannedDataStream.listen((scanData) {
+      debugPrint('QR Data.... ${DateTime.now()}');
       if (scanData.code == null ||
           scanData.code!.trim().isEmpty ||
           lastCode.compareTo(scanData.code!) == 0) {
@@ -177,29 +163,42 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
         return;
       }
       debugPrint('QRcode 1: ${scanData.code}');
-      lastCode = scanData.code!;
+      setState(() {
+        result = scanData;
+        lastCode = scanData.code!;
+      });
 
-      debugPrint(convert.jsonEncode({'receiptId': lastCode}));
-      post(Uri.https('ekasa.financnasprava.sk', '/mdu/api/v1/opd/receipt/find'),
-              body: convert.jsonEncode({'receiptId': lastCode}),
-              headers: {'Content-Type': 'application/json'})
-          .then((receiptResponse) {
-        debugPrint('Status code: ${receiptResponse.statusCode}');
-        var receipt =
-            convert.jsonDecode(receiptResponse.body) as Map<String, dynamic>;
-        log(receipt.toString());
-        // debugPrint(receipt.toString());
-        controller.dispose();
-        lastCode = '';
-        Navigator.pushReplacementNamed(bc, ReceiptSummaryPage.route,
-            arguments: Receipt.fromJson(receipt));
-      }, onError: (err) => debugPrint(err.toString()));
+      // debugPrint(convert.jsonEncode({'receiptId': lastCode}));
+      // post(Uri.https('ekasa.financnasprava.sk', '/mdu/api/v1/opd/receipt/find'),
+      //         body: convert.jsonEncode({'receiptId': lastCode}),
+      //         headers: {'Content-Type': 'application/json'})
+      //     .then((receiptResponse) {
+      // debugPrint('Status code: ${receiptResponse.statusCode}');
+      var receipt =
+          convert.jsonDecode(getMockResponse()) as Map<String, dynamic>;
+      log(receipt.toString());
+      // debugPrint(receipt.toString());
+      // controller.dispose();
+      // setState(() {
+      // lastCode = '';
+      // });
+      // Navigator.pushReplacementNamed(bc, ReceiptSummaryPage.route,
+      //     arguments: Receipt.fromJson(receipt));
+      // }, onError: (err) => debugPrint(err.toString()));
 
       // setState(() {
-      //   debugPrint('QRcode 2: ${scanData.code}');
+      //   debugPrint('QR code 2: ${scanData.code}');
       //   result = scanData;
       // });
-    });
+    } /* , onError: (object, stacktrace) {
+      debugPrint('ERROR');
+      debugPrint(object);
+      debugPrint(stacktrace);
+    }, onDone: () {
+      debugPrint('DONE');
+    } */
+        );
+    debugPrint('QR listener created');
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
