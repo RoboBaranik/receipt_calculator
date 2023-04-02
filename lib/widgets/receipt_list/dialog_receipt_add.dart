@@ -31,6 +31,7 @@ class DialogReceiptAdd extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushNamed(context, ReceiptScannerPage.route)
                       .then((createdReceipt) {
+                    debugPrint('Created receipt: $createdReceipt');
                     if (createdReceipt != null) {
                       Navigator.pop(context, createdReceipt);
                     }

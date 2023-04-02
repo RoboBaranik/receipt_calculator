@@ -48,7 +48,7 @@ class Receipt {
   }
 
   double getMemberSum(Person member) {
-    return items.map((item) => item.getMemberPayment(member)).sum;
+    return items.map((item) => item.getMemberPayment(member).payment).sum;
   }
 
   List<Partition> getMembersPartitions(List<Person> members) {
@@ -118,18 +118,32 @@ class ReceiptItem {
     this.price = price;
   }
 
-  double getMemberPayment(Person member) {
+  Partition getMemberPayment(Person member) {
     List<Partition> itemPayment =
         partsPaid.where((part) => part.person == member).toList();
     if (itemPayment.isEmpty) {
-      return 0;
+      return Partition(person: member, payment: 0, displayedPartPaid: '0');
     }
-    return itemPayment.map((e) => e.payment).sum;
+    if (itemPayment.length > 1) {
+      debugPrint('Duplicated parts paid, applying first');
+    }
+    return itemPayment.first;
+  }
+
+  double getPriceByQuantityPaid(int quantity) {
+    return price / this.quantity * quantity;
   }
 
   static double getPartitionPercent(int index, List<Partition> partitions) {
     double sum = partitions.map((partition) => partition.payment).sum;
     return partitions.elementAt(index).payment / (sum / 100);
+  }
+
+  double assignedPercent([List<Partition>? parts]) {
+    double sum = (parts ?? partsPaid).map((partition) => partition.payment).sum;
+    sum = (sum * 100).round() / 100;
+    // debugPrint('Sum: $sum Price: $price. Percent: ${sum / (price / 100)}');
+    return (sum / (price / 100)).roundToDouble();
   }
 
   @override
@@ -146,12 +160,14 @@ class ExpandableReceiptItem {
 
 class Partition {
   final Person person;
+  String displayedPartPaid;
   double payment;
 
-  Partition({required this.person, this.payment = 0});
+  Partition(
+      {required this.person, this.payment = 0, this.displayedPartPaid = '0'});
 
   @override
   String toString() {
-    return '$person paid $payment';
+    return '$person paid $displayedPartPaid ($payment)';
   }
 }

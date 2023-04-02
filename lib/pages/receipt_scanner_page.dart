@@ -100,9 +100,13 @@ class _ReceiptScannerPageState extends State<ReceiptScannerPage> {
                                   var receipt =
                                       convert.jsonDecode(getMockResponse())
                                           as Map<String, dynamic>;
-                                  Navigator.pushReplacementNamed(
-                                      context, ReceiptSummaryPage.route,
-                                      arguments: Receipt.fromJson(receipt));
+                                  Navigator.pushNamed(
+                                          context, ReceiptSummaryPage.route,
+                                          arguments: Receipt.fromJson(receipt))
+                                      .then((value) {
+                                    debugPrint('QR return $value');
+                                    Navigator.pop(context, value);
+                                  });
                                 },
                           child: const Text('Confirm',
                               style: TextStyle(fontSize: 20)),

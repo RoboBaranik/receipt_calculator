@@ -42,6 +42,10 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
         },
         child: const Icon(Icons.add),
       ),
+      bottomNavigationBar: BottomNavigationBar(items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Receipt list'),
+        BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'Payments'),
+      ]),
       body: ListView.separated(
         itemCount: widget.receipts.length,
         itemBuilder: (context, index) => GestureDetector(
