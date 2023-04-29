@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
@@ -6,6 +7,7 @@ import 'package:receipt_calculator/helper.dart';
 import 'package:receipt_calculator/routes.dart';
 import 'package:receipt_calculator/widgets/payment_progress_bar.dart';
 import 'package:receipt_calculator/widgets/receipt_summary/dialog_person_add.dart';
+import 'package:receipt_calculator/widgets/receipt_summary/member_paid_total_list_item.dart';
 
 class ReceiptSummaryPage extends StatefulWidget {
   static const String route = '/receipt_summary';
@@ -37,12 +39,60 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
             ),
           ),
           body: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             width: double.infinity,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: bodyColumnContents(),
             ),
+          ),
+          bottomSheet: BottomSheet(
+            enableDrag: false,
+            onClosing: () {},
+            builder: (context) {
+              double assigned = widget.receipt
+                  .getMembersPaymentSum(widget.receipt.group.members);
+              double sum = widget.receipt.sum;
+              return Container(
+                padding: EdgeInsets.only(top: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: assigned < sum
+                          ? [
+                              Text(
+                                  'Assigned: ${Helper.valueLongWithCurrency(assigned, null)}'),
+                              Text(
+                                'Missing: ${Helper.valueLongWithCurrency(sum - assigned, null)}',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ]
+                          : [
+                              Text(
+                                  'Assigned: ${Helper.valueLongWithCurrency(assigned, null)}'),
+                            ],
+                    ),
+                    // ElevatedButton(onPressed: null, child: Text('Split')),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.receipt,
+                              arguments: [widget.receipt, false]).then((value) {
+                            setState(() {});
+                          });
+                        },
+                        icon: const Icon(Icons.groups),
+                        label: const Text('Split receipt')),
+                    Text(
+                      'UID: ${widget.receipt.id}',
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
         onWillPop: () async {
@@ -64,19 +114,9 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
         ),
       ),
       const SizedBox(height: 16),
-      Table(
-        defaultColumnWidth: const IntrinsicColumnWidth(),
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        children: buildMemberPayments(memberPayments, context),
-      ),
-      const SizedBox(height: 16),
-      // Text(
-      //   'Paid by:',
-      //   style: TextStyle(
-      //       fontSize: 12, color: Theme.of(context).primaryColor),
-      // ),
       Row(
         children: [
+          const SizedBox(width: 32),
           Expanded(
               child: DropdownButtonFormField<Person>(
                   hint: const Text('Receipt paid by ...'),
@@ -110,24 +150,38 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
                   }
                 });
               },
-              icon: const Icon(Icons.add))
+              icon: const Icon(Icons.add)),
+          const SizedBox(width: 32),
         ],
       ),
       const SizedBox(height: 16),
-      ElevatedButton.icon(
-          onPressed: () {
-            Navigator.pushNamed(context, Routes.receipt,
-                    arguments: widget.receipt)
-                .then((value) {
-              setState(() {});
-            });
-          },
-          icon: const Icon(Icons.groups),
-          label: const Text('Split receipt')),
-      Text(
-        'UID: ${widget.receipt.id}',
-        style: const TextStyle(fontSize: 10),
-      ),
+      Flexible(
+          // constraints: BoxConstraints(maxHeight: 300),
+          child: ListView.separated(
+              itemBuilder: (context, index) {
+                Partition payment = memberPayments[index];
+                return MemberPaidTotalListItem(
+                    payment: payment,
+                    receipt: widget.receipt,
+                    onReturn: () {
+                      setState(() {});
+                    },
+                    memberIconColor: Helper.colorPerPerson[index % 10]);
+              },
+              separatorBuilder: (context, index) =>
+                  Container(height: 1, color: Colors.black12),
+              itemCount: memberPayments.length)),
+      // Table(
+      //   defaultColumnWidth: const IntrinsicColumnWidth(),
+      //   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      //   children: buildMemberPayments(memberPayments, context),
+      // ),
+      const SizedBox(height: 16),
+      // Text(
+      //   'Paid by:',
+      //   style: TextStyle(
+      //       fontSize: 12, color: Theme.of(context).primaryColor),
+      // ),
     ];
   }
 

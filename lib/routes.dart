@@ -20,9 +20,13 @@ class Routes {
 
     switch (settings.name) {
       case receipt:
+        bool argsValid = args != null && (args as List<Object>).length == 2;
+        List<Object> arguments = args as List<Object>;
         return PageRouteBuilder(
-            pageBuilder: (context, _, __) =>
-                ReceiptPage(receipt: args != null ? args as Receipt : mocked1),
+            pageBuilder: (context, _, __) => ReceiptPage(
+                  receipt: argsValid ? arguments[0] as Receipt : mocked1,
+                  isSingle: argsValid ? arguments[1] as bool : false,
+                ),
             transitionsBuilder: transition);
       case receiptList:
         return PageRouteBuilder(
