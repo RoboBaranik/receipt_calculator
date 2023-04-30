@@ -45,7 +45,7 @@ class MemberPaidTotalListItem extends StatelessWidget {
         IconButton(
             onPressed: () {
               Navigator.pushNamed(context, Routes.receipt,
-                  arguments: [receipt, true]).then((value) {
+                  arguments: [receipt, payment.person]).then((value) {
                 onReturn.call();
               });
             },

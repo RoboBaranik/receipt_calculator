@@ -79,8 +79,8 @@ class Helper {
     return formatter.format(fixedValue);
   }
 
-  static String countToString(int count) {
-    if (count == 1) {
+  static String countToString(int count, [bool? showQuantityOne]) {
+    if (count == 1 && (showQuantityOne == null || !showQuantityOne)) {
       return '';
     }
     String countSimple =

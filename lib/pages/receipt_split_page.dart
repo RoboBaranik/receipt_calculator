@@ -10,16 +10,17 @@ class ReceiptSplitPage extends StatefulWidget {
   final int itemIndex;
   final ReceiptItem item;
   final Map<Person, TextEditingController> personToController;
-  final List<Partition> partsPaid;
+  final Map<Person, Partition> partsPaid;
   ReceiptSplitPage({super.key, required this.receipt, required this.itemIndex})
       : item = receipt.items[itemIndex],
-        partsPaid = List.from(receipt.items[itemIndex].partsPaid),
+        partsPaid = Map.from(receipt.items[itemIndex].partsPaid),
         personToController = {
           for (var person in receipt.group.members)
             person: TextEditingController(
                 text: receipt.items[itemIndex]
-                    .getMemberPayment(person)
-                    .displayedPartPaid)
+                        .getMemberPayment(person)
+                        ?.displayedPartPaid ??
+                    '0.0')
         };
 
   @override
@@ -124,7 +125,7 @@ class _ReceiptSplitPageState extends State<ReceiptSplitPage> {
                 changePartsPaid(
                     false, isQuantity, widget.item, person, fractions);
               }, () {
-                updatePartsPaid(0, isQuantity ? '0' : '0/1', person);
+                updatePartsPaid(0, 0, isQuantity ? '0' : '0/1', person);
                 widget.personToController[person]!.text =
                     isQuantity ? '0' : fractions.first;
                 setState(() {});
@@ -147,6 +148,7 @@ class _ReceiptSplitPageState extends State<ReceiptSplitPage> {
               }, () {
                 updatePartsPaid(
                     widget.item.price,
+                    widget.item.quantity,
                     isQuantity
                         ? widget.item.quantity.toString()
                         : '$memberSize/$memberSize',
@@ -210,7 +212,7 @@ class _ReceiptSplitPageState extends State<ReceiptSplitPage> {
         var newQuantity = (increase ? quantity + 1 : quantity - 1);
         var displayedQuantity = newQuantity.toString();
         var price = widget.item.getPriceByQuantityPaid(newQuantity);
-        updatePartsPaid(price, displayedQuantity, person);
+        updatePartsPaid(price, newQuantity, displayedQuantity, person);
         widget.personToController[person]!.text = newQuantity.toString();
         setState(() {});
       }
@@ -225,7 +227,7 @@ class _ReceiptSplitPageState extends State<ReceiptSplitPage> {
           .map((fPart) => int.tryParse(fPart) ?? 1)
           .toList();
       updatePartsPaid(widget.item.price / fractionParts[1] * fractionParts[0],
-          newFraction, person);
+          newFraction.startsWith('0') ? 0 : 1, newFraction, person);
       widget.personToController[person]!.text = newFraction;
       setState(() {});
     } else {
@@ -244,16 +246,22 @@ class _ReceiptSplitPageState extends State<ReceiptSplitPage> {
     return fractions;
   }
 
-  void updatePartsPaid(double price, String displayedPartPaid, Person person) {
-    var paid = widget.partsPaid.where((part) => part.person == person).toList();
-    if (paid.isNotEmpty) {
-      paid.first.displayedPartPaid = displayedPartPaid;
-      paid.first.payment = price;
+  void updatePartsPaid(
+      double price, int quantity, String displayedPartPaid, Person person) {
+    Partition? paid = widget.partsPaid.containsKey(person)
+        ? widget.partsPaid[person]
+        : null; // .where((part) => part.person == person).toList();
+    if (paid != null) {
+      paid.displayedPartPaid = displayedPartPaid;
+      paid.payment = price;
     } else {
-      widget.partsPaid.add(Partition(
-          person: person,
-          payment: price,
-          displayedPartPaid: displayedPartPaid));
+      widget.partsPaid.putIfAbsent(
+          person,
+          () => Partition(
+              person: person,
+              payment: price,
+              quantity: quantity,
+              displayedPartPaid: displayedPartPaid));
     }
     debugPrint('Updating parts paid: $displayedPartPaid ($price) by $person');
     debugPrint(widget.partsPaid.toString());

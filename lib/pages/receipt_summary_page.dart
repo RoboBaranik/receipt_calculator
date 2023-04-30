@@ -79,7 +79,7 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
                     OutlinedButton.icon(
                         onPressed: () {
                           Navigator.pushNamed(context, Routes.receipt,
-                              arguments: [widget.receipt, false]).then((value) {
+                              arguments: [widget.receipt, null]).then((value) {
                             setState(() {});
                           });
                         },

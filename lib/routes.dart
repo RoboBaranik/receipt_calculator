@@ -25,7 +25,7 @@ class Routes {
         return PageRouteBuilder(
             pageBuilder: (context, _, __) => ReceiptPage(
                   receipt: argsValid ? arguments[0] as Receipt : mocked1,
-                  isSingle: argsValid ? arguments[1] as bool : false,
+                  member: argsValid ? arguments[1] as Person? : null,
                 ),
             transitionsBuilder: transition);
       case receiptList:
@@ -80,13 +80,14 @@ class Routes {
           Animation<double> a2, Widget child) =>
       FadeTransition(opacity: a1, child: child);
 
-  static ReceiptGroup mockedGroup = ReceiptGroup(members: [
-    Person('Abraham Asertive'),
-    Person('Betty Bored'),
-    Person('Cindy Clever'),
-    Person('DerekDetermined'),
-    Person('Eustace Exhausted')
-  ]);
+  static Person personA = Person('Abraham Asertive');
+  static Person personB = Person('Betty Bored');
+  static Person personC = Person('Cindy Clever');
+  static Person personD = Person('DerekDetermined');
+  static Person personE = Person('Eustace Exhausted');
+
+  static ReceiptGroup mockedGroup =
+      ReceiptGroup(members: [personA, personB, personC, personD, personE]);
   static Receipt mocked1 = Receipt(
       id: 'empty',
       name: 'LIDL',
@@ -95,13 +96,13 @@ class Routes {
       items: [
         ReceiptItem(
           name: 'Ketchup',
-          partsPaid: [
-            Partition(person: Person('Abraham Asertive'), payment: 10),
-            Partition(person: Person('Betty Bored'), payment: 50),
-            Partition(person: Person('Cindy Clever'), payment: 20),
-            Partition(person: Person('DerekDetermined'), payment: 5),
-            Partition(person: Person('Eustace Exhausted'), payment: 25),
-          ],
+          partsPaid: {
+            personA: Partition(person: personA, payment: 10, quantity: 1),
+            personB: Partition(person: personB, payment: 50, quantity: 1),
+            personC: Partition(person: personC, payment: 20, quantity: 1),
+            personD: Partition(person: personD, payment: 5, quantity: 1),
+            personE: Partition(person: personE, payment: 25, quantity: 1),
+          },
         ),
         ReceiptItem(name: 'Milk'),
         ReceiptItem(name: 'Chips'),
@@ -129,13 +130,13 @@ class Routes {
         ReceiptItem(
           name: 'Ketchup',
           price: 110,
-          partsPaid: [
-            Partition(person: Person('Abraham Asertive'), payment: 10),
-            Partition(person: Person('Betty Bored'), payment: 50),
-            Partition(person: Person('Cindy Clever'), payment: 20),
-            Partition(person: Person('DerekDetermined'), payment: 5),
-            Partition(person: Person('Eustace Exhausted'), payment: 25),
-          ],
+          partsPaid: {
+            personA: Partition(person: personA, payment: 10, quantity: 1),
+            personB: Partition(person: personB, payment: 50, quantity: 1),
+            personC: Partition(person: personC, payment: 20, quantity: 1),
+            personD: Partition(person: personD, payment: 5, quantity: 1),
+            personE: Partition(person: personE, payment: 25, quantity: 1),
+          },
         ),
       ]);
 }

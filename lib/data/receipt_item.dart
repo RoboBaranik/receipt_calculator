@@ -48,12 +48,15 @@ class Receipt {
   }
 
   double getMemberSum(Person member) {
-    return items.map((item) => item.getMemberPayment(member).payment).sum;
+    return items.map((item) {
+      Partition? payment = item.getMemberPayment(member);
+      return payment != null ? payment.payment : 0.0;
+    }).sum;
   }
 
   List<Partition> getMembersPartitions(List<Person> members) {
     return items
-        .expand((item) => item.partsPaid)
+        .expand((item) => item.partsPaid.values)
         .where((partition) => members.contains(partition.person))
         .groupFoldBy<Person, Partition>((partition) => partition.person,
             (previous, partition) {
@@ -67,7 +70,7 @@ class Receipt {
 
   double getMembersPaymentSum(List<Person> members) {
     return items
-        .expand((item) => item.partsPaid)
+        .expand((item) => item.partsPaid.values)
         .where((partition) => members.contains(partition.person))
         .map((partition) => partition.payment)
         .sum;
@@ -90,15 +93,15 @@ class ReceiptItem {
   int quantity;
   double price;
   final String currency;
-  List<Partition> partsPaid = [];
+  Map<Person, Partition> partsPaid = {};
 
   ReceiptItem(
       {this.name = ReceiptItem.defaultName,
       this.quantity = 1,
       this.price = 0.0,
       this.currency = 'EUR',
-      List<Partition>? partsPaid}) {
-    this.partsPaid = partsPaid ?? [];
+      Map<Person, Partition>? partsPaid}) {
+    this.partsPaid = partsPaid ?? {};
   }
   static ReceiptItem fromJson(Map<String, dynamic> json) {
     var q = json['quantity'];
@@ -118,16 +121,16 @@ class ReceiptItem {
     this.price = price;
   }
 
-  Partition getMemberPayment(Person member) {
-    List<Partition> itemPayment =
-        partsPaid.where((part) => part.person == member).toList();
-    if (itemPayment.isEmpty) {
-      return Partition(person: member, payment: 0, displayedPartPaid: '0');
-    }
-    if (itemPayment.length > 1) {
-      debugPrint('Duplicated parts paid, applying first');
-    }
-    return itemPayment.first;
+  Partition? getMemberPayment(Person member) {
+    return partsPaid.containsKey(member) ? partsPaid[member] : null;
+    // partsPaid.where((part) => part.person == member).toList();
+    // if (itemPayment.isEmpty) {
+    //   return null; //Partition(person: member, payment: 0, displayedPartPaid: '0');
+    // }
+    // if (itemPayment.length > 1) {
+    //   debugPrint('Duplicated parts paid, applying first');
+    // }
+    // return itemPayment.first;
   }
 
   double getPriceByQuantityPaid(int quantity) {
@@ -139,8 +142,9 @@ class ReceiptItem {
     return partitions.elementAt(index).payment / (sum / 100);
   }
 
-  double assignedPercent([List<Partition>? parts]) {
-    double sum = (parts ?? partsPaid).map((partition) => partition.payment).sum;
+  double assignedPercent([Map<Person, Partition>? parts]) {
+    double sum =
+        (parts ?? partsPaid).values.map((partition) => partition.payment).sum;
     sum = (sum * 100).round() / 100;
     // debugPrint('Sum: $sum Price: $price. Percent: ${sum / (price / 100)}');
     return (sum / (price / 100)).roundToDouble();
@@ -162,9 +166,36 @@ class Partition {
   final Person person;
   String displayedPartPaid;
   double payment;
+  int quantity;
 
   Partition(
-      {required this.person, this.payment = 0, this.displayedPartPaid = '0'});
+      {required this.person,
+      this.payment = 0,
+      this.quantity = 0,
+      this.displayedPartPaid = '0'});
+  static Partition withQuantityOne(Person person, ReceiptItem item) {
+    double price = item.getPriceByQuantityPaid(1);
+    return Partition(
+        person: person,
+        quantity: 1,
+        payment: price,
+        displayedPartPaid: price.toStringAsFixed(2));
+  }
+
+  void updateFromNewQuantity(int change, ReceiptItem item) {
+    if (change == 0 ||
+        quantity + change > item.quantity ||
+        quantity + change < 0) {
+      return;
+    }
+    quantity += change;
+    payment = item.getPriceByQuantityPaid(quantity);
+    displayedPartPaid = paymentToString();
+  }
+
+  String paymentToString() {
+    return payment.toStringAsFixed(2);
+  }
 
   @override
   String toString() {

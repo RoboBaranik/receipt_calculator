@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
+import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
 
 class PartitionProgressBar extends StatefulWidget {
   final Receipt receipt;
-  final List<Partition> partsPaid;
+  final Map<Person, Partition> partsPaid;
   final bool compact;
   const PartitionProgressBar(
       {super.key,
@@ -54,7 +55,8 @@ class _PartitionProgressBarState extends State<PartitionProgressBar> {
     //   ));
     // }
     // debugPrint(parts.toString());
-    var relevantParts = widget.partsPaid.where((p) => p.payment != 0).toList();
+    var relevantParts =
+        widget.partsPaid.values.where((p) => p.payment != 0).toList();
 
     relevantParts.asMap().forEach((index, part) {
       if (index > 0) {
