@@ -7,18 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
+import 'package:receipt_calculator/widgets/receipt/list_item_single_controller.dart';
 
 class ListItemSingle extends StatefulWidget {
   final Receipt receipt;
   final int itemIndex;
   final Person member;
   final ReceiptItem item;
+  final ListController controller;
 
   ListItemSingle(
       {super.key,
       required this.receipt,
       required this.itemIndex,
-      required this.member})
+      required this.member,
+      required this.controller})
       : item = receipt.items[itemIndex];
 
   @override
@@ -42,6 +45,16 @@ class _ListItemSingleState extends State<ListItemSingle> {
 
   @override
   Widget build(BuildContext context) {
+    widget.controller.onOpen = () {
+      setState(() {
+        isSelected = true;
+      });
+    };
+    widget.controller.onClose = () {
+      setState(() {
+        isSelected = false;
+      });
+    };
     return Stack(
       children: isSelected
           ? [backgroundPayment(), mainContent(), filter(), quantityChanger()]
@@ -89,10 +102,7 @@ class _ListItemSingleState extends State<ListItemSingle> {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
-                setState(() {
-                  isSelected = false;
-                  debugPrint('Deselect');
-                });
+                widget.controller.close();
               },
               child: Center(
                 child: Text(
@@ -140,10 +150,7 @@ class _ListItemSingleState extends State<ListItemSingle> {
       onTap: isQuantityMultiple
           ? () {
               debugPrint('Tap ${widget.itemIndex}');
-              setState(() {
-                isSelected = true;
-                debugPrint('Select');
-              });
+              widget.controller.open();
             }
           : null,
       onLongPress: isQuantityMultiple
@@ -152,12 +159,12 @@ class _ListItemSingleState extends State<ListItemSingle> {
             }
           : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              flex: 7,
+              flex: 12,
               child: Text(
                 widget.item.name,
                 textAlign: TextAlign.left,
@@ -168,13 +175,13 @@ class _ListItemSingleState extends State<ListItemSingle> {
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 4,
               child: Text(Helper.countToString(widget.item.quantity),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: getTextColor())),
             ),
             Expanded(
-              flex: 2,
+              flex: 4,
               child: Text(
                   Helper.valueShortWithCurrency(
                       widget.item.price, widget.item.currency),
@@ -188,28 +195,45 @@ class _ListItemSingleState extends State<ListItemSingle> {
   }
 
   Widget backgroundPayment() {
-    Map<Person, Partition> copy = Map.from(widget.item.partsPaid);
-    List<Partition> currentMemberFirst =
-        copy.values.sorted((a, b) => a.person == widget.member
-            ? -1
-            : b.person == widget.member
-                ? 1
-                : 0);
-    int quantitySum = currentMemberFirst.map((payment) => payment.quantity).sum;
+    Map<Person, Partition> partsPaidCopy = Map.from(widget.item.partsPaid);
+    // List<Partition> currentMemberFirst =
+    //     partsPaidCopy.values.sorted((a, b) => a.person == widget.member
+    //         ? -1
+    //         : b.person == widget.member
+    //             ? 1
+    //             : 0);
+    List<Partition> withoutCurrentMember = [];
+    // partsPaidCopy.values
+    //     .where((payment) => payment.person != widget.member)
+    //     .toList();
+    for (var member in widget.receipt.group.members) {
+      if (member != widget.member && partsPaidCopy.containsKey(member)) {
+        withoutCurrentMember.add(partsPaidCopy[member]!);
+      }
+    }
+    int quantitySum =
+        partsPaidCopy.values.map((payment) => payment.quantity).sum;
     int maxQuantity = max(widget.item.quantity, quantitySum);
     // debugPrint('Item ${widget.item.name} quantity sum = $maxQuantity');
     // currentMemberFirst.forEach(
     //   (element) => debugPrint('--- ${element.person} = ${element.quantity}'),
     // );
-    List<Expanded> progressBar = List.generate(
-      widget.item.partsPaid.length,
+    List<Expanded> progressBar = [];
+    if (partsPaidCopy.containsKey(widget.member)) {
+      int flex = getFlexFromQuantity(
+          partsPaidCopy[widget.member]!.quantity, maxQuantity);
+      progressBar
+          .add(Expanded(flex: flex, child: Container(color: Colors.black12)));
+    }
+    progressBar.addAll(List.generate(
+      withoutCurrentMember.length,
       (index) {
         int flex =
-            (currentMemberFirst[index].quantity / (maxQuantity / 100) * 100)
+            (withoutCurrentMember[index].quantity / (maxQuantity / 100) * 100)
                 .round();
         // debugPrint('Flex = $flex');
         int indexOfMember = widget.receipt.group.members
-            .indexOf(currentMemberFirst[index].person);
+            .indexOf(withoutCurrentMember[index].person);
         Color colorOfMember = indexOfMember >= 0
             ? Helper.colorPerPerson[indexOfMember % 10].withOpacity(0.20)
             : Colors.black12;
@@ -218,32 +242,28 @@ class _ListItemSingleState extends State<ListItemSingle> {
           child: Container(
             // height: 10,
             decoration: BoxDecoration(
-              color: index == 0 ? Colors.black12 : null,
-              gradient: index == 0
-                  ? null
-                  : LinearGradient(
-                      // begin: Alignment.topLeft,
-                      end: const Alignment(-0.4, 0),
-                      stops: const [0.0, 0.5, 0.5, 1],
-                      transform:
-                          GradientRotation(pi / 4 * (index % 2 == 0 ? 1 : -1)),
-                      colors: [
-                        colorOfMember,
-                        colorOfMember,
-                        Colors.transparent,
-                        Colors.transparent,
-                      ],
-                      tileMode: TileMode.repeated,
-                    ),
+              gradient: LinearGradient(
+                // begin: Alignment.topLeft,
+                end: const Alignment(-0.4, 0),
+                stops: const [0.0, 0.5, 0.5, 1],
+                transform: GradientRotation(pi / 4 * (index % 2 == 0 ? 1 : -1)),
+                colors: [
+                  colorOfMember,
+                  colorOfMember,
+                  Colors.transparent,
+                  Colors.transparent,
+                ],
+                tileMode: TileMode.repeated,
+              ),
             ),
           ),
         );
       },
-    );
+    ));
     if (widget.item.quantity > quantitySum) {
       int missingQuantity = widget.item.quantity - quantitySum;
       // debugPrint('Missing quantity = $missingQuantity');
-      int flex = (missingQuantity / (maxQuantity / 100) * 100).round();
+      int flex = getFlexFromQuantity(missingQuantity, maxQuantity);
       progressBar.add(Expanded(
         flex: flex,
         child: Container(
@@ -258,4 +278,7 @@ class _ListItemSingleState extends State<ListItemSingle> {
       ),
     );
   }
+
+  int getFlexFromQuantity(int q, int maxQuantity) =>
+      (q / (maxQuantity / 100) * 100).round();
 }

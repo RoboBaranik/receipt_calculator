@@ -56,7 +56,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
           child: Container(
             decoration: const BoxDecoration(color: Colors.white),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            height: 64,
+            // height: 64,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -64,7 +64,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 16,
+                      // height: 16,
                       margin: const EdgeInsets.symmetric(vertical: 2),
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -73,7 +73,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
                       ),
                     ),
                     Container(
-                      height: 16,
+                      // height: 16,
                       margin: const EdgeInsets.symmetric(vertical: 2),
                       alignment: Alignment.centerLeft,
                       child: Text(

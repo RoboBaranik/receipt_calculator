@@ -107,8 +107,8 @@ class Routes {
         ReceiptItem(name: 'Milk'),
         ReceiptItem(name: 'Chips'),
         ReceiptItem(name: 'Yoghurt'),
-        ReceiptItem(name: 'Green apple', quantity: 5),
-        ReceiptItem(name: 'Strawberry', quantity: 120, price: 5),
+        ReceiptItem(name: 'Green apple', quantity: 5, price: 20),
+        ReceiptItem(name: 'Strawberry', quantity: 12, price: 5),
         ReceiptItem(
             name: 'Intel Core i5-12600K 3.5 GHz, 8-Core',
             quantity: 54321,

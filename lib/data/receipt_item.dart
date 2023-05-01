@@ -188,6 +188,12 @@ class Partition {
         quantity + change < 0) {
       return;
     }
+    // Don't increase quantity paid if already on the limit
+    int sumQuantity =
+        item.partsPaid.values.map((payment) => payment.quantity).sum;
+    if (item.quantity > 1 && change > 0 && sumQuantity >= item.quantity) {
+      return;
+    }
     quantity += change;
     payment = item.getPriceByQuantityPaid(quantity);
     displayedPartPaid = paymentToString();

@@ -26,9 +26,10 @@ class MemberPaidTotalListItem extends StatelessWidget {
             Icon(
               Icons.person,
               color: memberIconColor,
+              size: 35,
               shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
