@@ -20,7 +20,7 @@ class ReceiptSummaryPage extends StatefulWidget {
 }
 
 class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
-  Person? paidBy;
+  // Person? paidBy;
   @override
   Widget build(BuildContext context) {
     debugPrint(widget.receipt.id);
@@ -120,7 +120,7 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
           Expanded(
               child: DropdownButtonFormField<Person>(
                   hint: const Text('Receipt paid by ...'),
-                  value: paidBy,
+                  value: widget.receipt.paidBy,
                   items: widget.receipt.group.members
                       .map((person) => DropdownMenuItem<Person>(
                             value: person,
@@ -133,7 +133,7 @@ class _ReceiptSummaryPageState extends State<ReceiptSummaryPage> {
                       .toList(),
                   onChanged: (personNew) {
                     setState(() {
-                      paidBy = personNew!;
+                      widget.receipt.paidBy = personNew!;
                     });
                   })),
           const SizedBox(width: 4),

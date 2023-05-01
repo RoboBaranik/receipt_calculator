@@ -30,9 +30,8 @@ class Routes {
             transitionsBuilder: transition);
       case receiptList:
         return PageRouteBuilder(
-            pageBuilder: (context, _, __) => ReceiptListPage(
-                  receipts: [mocked1, mocked2],
-                ),
+            pageBuilder: (context, _, __) =>
+                ReceiptListPage(group: mockedGroup),
             transitionsBuilder: transition);
       case receiptCreateManual:
         return PageRouteBuilder(
@@ -86,8 +85,9 @@ class Routes {
   static Person personD = Person('DerekDetermined');
   static Person personE = Person('Eustace Exhausted');
 
-  static ReceiptGroup mockedGroup =
-      ReceiptGroup(members: [personA, personB, personC, personD, personE]);
+  static ReceiptGroup mockedGroup = ReceiptGroup(
+    members: [personA, personB, personC, personD, personE],
+  );
   static Receipt mocked1 = Receipt(
       id: 'empty',
       name: 'LIDL',
@@ -96,17 +96,19 @@ class Routes {
       items: [
         ReceiptItem(
           name: 'Ketchup',
+          quantity: 5,
+          price: 15,
           partsPaid: {
-            personA: Partition(person: personA, payment: 10, quantity: 1),
-            personB: Partition(person: personB, payment: 50, quantity: 1),
-            personC: Partition(person: personC, payment: 20, quantity: 1),
-            personD: Partition(person: personD, payment: 5, quantity: 1),
-            personE: Partition(person: personE, payment: 25, quantity: 1),
+            personA: Partition(person: personA, payment: 3, quantity: 1),
+            personB: Partition(person: personB, payment: 3, quantity: 1),
+            personC: Partition(person: personC, payment: 3, quantity: 1),
+            personD: Partition(person: personD, payment: 3, quantity: 1),
+            personE: Partition(person: personE, payment: 3, quantity: 1),
           },
         ),
-        ReceiptItem(name: 'Milk'),
-        ReceiptItem(name: 'Chips'),
-        ReceiptItem(name: 'Yoghurt'),
+        ReceiptItem(name: 'Milk', price: 2),
+        ReceiptItem(name: 'Chips', price: 0.5),
+        ReceiptItem(name: 'Yoghurt', price: 0.2),
         ReceiptItem(name: 'Green apple', quantity: 5, price: 20),
         ReceiptItem(name: 'Strawberry', quantity: 12, price: 5),
         ReceiptItem(

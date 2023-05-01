@@ -12,12 +12,14 @@ class Receipt {
   String? currency;
   final DateTime timeCreated;
   final List<ReceiptItem> items;
+  Person? paidBy;
   Receipt(
       {required this.name,
       required this.items,
       required this.timeCreated,
       required this.group,
       required this.id,
+      this.paidBy,
       this.currency = Helper.currency});
   static Receipt fromJson(Map<String, dynamic> json) {
     String name = json['receipt']['unit']['name'] ??
@@ -182,21 +184,36 @@ class Partition {
         displayedPartPaid: price.toStringAsFixed(2));
   }
 
-  void updateFromNewQuantity(int change, ReceiptItem item) {
-    if (change == 0 ||
-        quantity + change > item.quantity ||
-        quantity + change < 0) {
-      return;
-    }
-    // Don't increase quantity paid if already on the limit
+  void updateQuantity(int? change, ReceiptItem item) {
     int sumQuantity =
         item.partsPaid.values.map((payment) => payment.quantity).sum;
-    if (item.quantity > 1 && change > 0 && sumQuantity >= item.quantity) {
+    if (change == null) {
+      _updateQuantityMinMax(sumQuantity, item);
+    } else {
+      _updateQuantityStep(change, sumQuantity, item);
+    }
+    payment = item.getPriceByQuantityPaid(quantity);
+    displayedPartPaid = paymentToString();
+  }
+
+  void _updateQuantityStep(int change, int sumQuantity, ReceiptItem item) {
+    bool changeHasInvalidValue = change == 0 ||
+        quantity + change > item.quantity ||
+        quantity + change < 0;
+    bool changeWillOverflow =
+        item.quantity > 1 && change > 0 && sumQuantity >= item.quantity;
+    if (changeHasInvalidValue || changeWillOverflow) {
       return;
     }
     quantity += change;
-    payment = item.getPriceByQuantityPaid(quantity);
-    displayedPartPaid = paymentToString();
+  }
+
+  void _updateQuantityMinMax(int sumQuantity, ReceiptItem item) {
+    if (sumQuantity >= item.quantity) {
+      quantity = 0;
+    } else {
+      quantity = item.quantity - sumQuantity;
+    }
   }
 
   String paymentToString() {

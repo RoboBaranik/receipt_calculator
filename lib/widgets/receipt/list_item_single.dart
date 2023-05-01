@@ -62,19 +62,28 @@ class _ListItemSingleState extends State<ListItemSingle> {
     );
   }
 
-  void changeQuantity(int change) {
-    if (change == 0) return;
+  void changeQuantityPaid(int? change) {
+    if (change != null && change == 0) return;
     Partition? payment = widget.item.getMemberPayment(widget.member);
     if (payment == null) {
-      widget.item.partsPaid.putIfAbsent(
-          widget.member,
-          () => change > 0
-              ? Partition.withQuantityOne(widget.member, widget.item)
-              : Partition(person: widget.member));
+      Partition newPartition = Partition(person: widget.member);
+      newPartition.updateQuantity(change, widget.item);
+      widget.item.partsPaid.putIfAbsent(widget.member, () => newPartition);
       setState(() {});
       return;
     }
-    payment.updateFromNewQuantity(change, widget.item);
+    payment.updateQuantity(change, widget.item);
+    setState(() {});
+  }
+
+  void changeQuantityPaidSingular() {
+    Partition? payment = widget.item.getMemberPayment(widget.member);
+    if (payment == null) {
+      widget.item.partsPaid.putIfAbsent(widget.member,
+          () => Partition.withQuantityOne(widget.member, widget.item));
+    } else {
+      widget.item.partsPaid.remove(widget.member);
+    }
     setState(() {});
   }
 
@@ -88,7 +97,7 @@ class _ListItemSingleState extends State<ListItemSingle> {
             flex: 1,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => changeQuantity(-1),
+              onTap: () => changeQuantityPaid(-1),
               child: Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -116,7 +125,7 @@ class _ListItemSingleState extends State<ListItemSingle> {
             flex: 1,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => changeQuantity(1),
+              onTap: () => changeQuantityPaid(1),
               child: Container(
                 width: double.infinity,
                 height: double.infinity,
@@ -152,10 +161,13 @@ class _ListItemSingleState extends State<ListItemSingle> {
               debugPrint('Tap ${widget.itemIndex}');
               widget.controller.open();
             }
-          : null,
+          : () {
+              changeQuantityPaidSingular();
+            },
       onLongPress: isQuantityMultiple
           ? () {
               debugPrint('Hold');
+              changeQuantityPaid(null);
             }
           : null,
       child: Container(
