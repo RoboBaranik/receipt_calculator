@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
@@ -125,47 +127,226 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
         Person member = widget.group.members[index];
         Color memberIconColor = Helper.colorPerPerson[index % 10];
         double payment = widget.group.getMemberPayment(member);
-        return GestureDetector(
-          onTap: null,
-          child: Container(
-            decoration: const BoxDecoration(color: Colors.white),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            // height: 64,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person,
-                      color: memberIconColor,
-                      size: 35,
-                      shadows: const [
-                        Shadow(color: Colors.black, blurRadius: 2)
-                      ],
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          member.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        // const SizedBox(height: 4),
-                        Text(Helper.valueLongWithCurrency(payment, null)),
-                      ],
-                    )
-                  ],
-                )
-              ],
+        Icon totalPayIcon;
+        Color totalPayColor;
+        if (payment > 0) {
+          totalPayColor = Colors.red;
+          totalPayIcon =
+              const Icon(Icons.keyboard_arrow_left, color: Colors.red);
+        } else if (payment == 0) {
+          totalPayColor = Colors.black45;
+          totalPayIcon =
+              const Icon(Icons.circle_outlined, color: Colors.black45);
+        } else {
+          totalPayColor = Colors.lime.shade600;
+          totalPayIcon =
+              Icon(Icons.keyboard_arrow_right, color: Colors.lime.shade600);
+        }
+        return ExpandablePanel(
+            theme: const ExpandableThemeData(
+                hasIcon: false, tapHeaderToExpand: true),
+            header: Container(
+              decoration: const BoxDecoration(color: Colors.white),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              // height: 64,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: memberIconColor,
+                        size: 35,
+                        shadows: const [
+                          Shadow(color: Colors.black, blurRadius: 2)
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            member.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          // const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              totalPayIcon,
+                              Text(
+                                Helper.valueLongWithCurrency(
+                                    payment.abs(), null),
+                                style: TextStyle(color: totalPayColor),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-        );
+            collapsed: Container(),
+            expanded: paymentDetails(member));
+        // return GestureDetector(
+        //   onTap: null,
+        //   child: Container(
+        //     decoration: const BoxDecoration(color: Colors.white),
+        //     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        //     // height: 64,
+        //     child: Column(
+        //       children: [
+        //         Row(
+        //           children: [
+        //             Icon(
+        //               Icons.person,
+        //               color: memberIconColor,
+        //               size: 35,
+        //               shadows: const [
+        //                 Shadow(color: Colors.black, blurRadius: 2)
+        //               ],
+        //             ),
+        //             const SizedBox(width: 8),
+        //             Column(
+        //               crossAxisAlignment: CrossAxisAlignment.start,
+        //               children: [
+        //                 Text(
+        //                   member.name,
+        //                   style: const TextStyle(fontWeight: FontWeight.bold),
+        //                 ),
+        //                 // const SizedBox(height: 4),
+        //                 Row(
+        //                   children: [
+        //                     totalPayIcon,
+        //                     Text(
+        //                       Helper.valueLongWithCurrency(payment.abs(), null),
+        //                       style: TextStyle(color: totalPayColor),
+        //                     ),
+        //                   ],
+        //                 ),
+        //               ],
+        //             )
+        //           ],
+        //         )
+        //       ],
+        //     ),
+        //   ),
+        // );
       },
       separatorBuilder: (context, index) => Container(
         height: 1,
         color: Colors.black12,
       ),
     );
+  }
+
+  Widget paymentDetails(Person member) {
+    List<Widget> paymentDetails = [];
+    var towards = paymentDetailsDebtTowards(member);
+    var from = paymentDetailsDebtFrom(member);
+    paymentDetails.addAll(towards);
+    if (towards.isNotEmpty && from.isNotEmpty) {
+      paymentDetails.add(const SizedBox(height: 8));
+    }
+    paymentDetails.addAll(from);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Column(
+        children: paymentDetails,
+      ),
+    );
+  }
+
+  List<Widget> paymentDetailsDebtTowards(Person member) {
+    var debtMap = widget.group.getDebtTowardsMember(member);
+    List<Widget> debtItems = [];
+    debtMap.forEach((receipt, paymentMap) {
+      String totalDebtForReceipt = Helper.valueLongWithCurrency(
+          paymentMap.values.map((payment) => payment.payment).sum, null);
+      Widget debtItem = Row(children: [
+        Text(receipt.name, style: TextStyle(fontWeight: FontWeight.bold)),
+        Icon(Icons.keyboard_arrow_right, color: Colors.lime.shade600),
+        Text(totalDebtForReceipt,
+            style: TextStyle(color: Colors.lime.shade600)),
+      ]);
+      debtItems.add(debtItem);
+      for (var payment in paymentMap.values) {
+        Color memberIconColor = Colors.black;
+        int index = widget.group.members.indexOf(payment.person);
+        if (index >= 0) {
+          memberIconColor = Helper.colorPerPerson[index % 10];
+        }
+        String totalDebtForPerson =
+            Helper.valueLongWithCurrency(payment.payment, null);
+        Widget debtItemMember = Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(Icons.person, color: memberIconColor),
+            Text(payment.person.name),
+            Icon(Icons.keyboard_arrow_right, color: Colors.lime.shade600),
+            Text(totalDebtForPerson,
+                style: TextStyle(color: Colors.lime.shade600)),
+          ],
+        );
+        debtItems.add(debtItemMember);
+      }
+    });
+    return debtItems;
+  }
+
+  List<Widget> paymentDetailsDebtFrom(Person member) {
+    var debtMap = widget.group.getMembersDebt(member);
+    List<Widget> debtItems = [];
+    debtMap.forEach((receipt, itemMap) {
+      Color memberIconColor = Colors.black;
+      Text paidByName =
+          const Text('Payer not set', style: TextStyle(color: Colors.black45));
+      if (receipt.paidBy != null) {
+        paidByName = Text(
+          receipt.paidBy!.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        );
+        int index = widget.group.members.indexOf(receipt.paidBy!);
+        if (index >= 0) {
+          memberIconColor = Helper.colorPerPerson[index % 10];
+        }
+      }
+      String totalDebtForReceipt =
+          Helper.valueLongWithCurrency(receipt.getMemberSum(member), null);
+
+      bool specifyStoreDate = debtMap.keys.any((receipt1) =>
+          receipt1 != receipt && receipt1.name.compareTo(receipt.name) == 0);
+      Widget debtItem = Row(
+        children: [
+          Icon(Icons.person, color: memberIconColor),
+          const SizedBox(width: 4),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              paidByName,
+              Row(
+                  children: specifyStoreDate
+                      ? [
+                          Text(receipt.name,
+                              style: const TextStyle(fontSize: 12)),
+                          const SizedBox(width: 4),
+                          Text(Helper.dateTimeToString(receipt.timeCreated),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black45)),
+                        ]
+                      : [
+                          Text(receipt.name,
+                              style: const TextStyle(fontSize: 12)),
+                        ]),
+            ],
+          ),
+          const Icon(Icons.keyboard_arrow_left, color: Colors.red),
+          Text(totalDebtForReceipt, style: const TextStyle(color: Colors.red)),
+        ],
+      );
+      debtItems.add(debtItem);
+    });
+    return debtItems;
   }
 }

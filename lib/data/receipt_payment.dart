@@ -22,7 +22,61 @@ class ReceiptGroup {
       debugPrint('${member.name} not in members group: $members');
       return 0;
     }
-    return receipts.map((receipt) => receipt.getMemberSum(member)).sum;
+    return receipts.map((receipt) {
+      if (receipt.paidBy != member) {
+        return receipt.getMemberSum(member);
+      }
+      return members
+          .where((member1) => member1 != member)
+          .map((m) => -receipt.getMemberSum(m))
+          .sum;
+    }).sum;
+  }
+
+  /// Only receipts not paid by member
+  Map<Receipt, Map<ReceiptItem, Partition>> getMembersDebt(Person member) {
+    if (!members.contains(member)) {
+      debugPrint('${member.name} not in members group: $members');
+      return {};
+    }
+    Map<Receipt, Map<ReceiptItem, Partition>> paymentMap = {};
+    var relevantReceipts = receipts.where((receipt) =>
+        receipt.getMembersPartitions([member]).isNotEmpty &&
+        receipt.paidBy != member);
+    for (var receipt in relevantReceipts) {
+      var relevantItems =
+          receipt.items.where((item) => item.partsPaid.containsKey(member));
+      Map<ReceiptItem, Partition> map = {
+        for (var item in relevantItems) item: item.partsPaid[member]!
+      };
+      paymentMap.putIfAbsent(receipt, () => map);
+    }
+    return paymentMap;
+  }
+
+  Map<Receipt, Map<Person, Partition>> getDebtTowardsMember(Person member) {
+    if (!members.contains(member)) {
+      debugPrint('${member.name} not in members group: $members');
+      return {};
+    }
+    Map<Receipt, Map<Person, Partition>> paymentMap = {};
+    var relevantReceipts = receipts.where((receipt) =>
+        receipt
+            .getMembersPartitions(
+                members.where((member1) => member1 != member).toList())
+            .isNotEmpty &&
+        receipt.paidBy == member);
+    for (var receipt in relevantReceipts) {
+      // var relevantItems =
+      //     receipt.items.where((item) => !item.partsPaid.containsKey(member));
+      var relevantPayments = receipt.getMembersPartitions(
+          members.where((member1) => member1 != member).toList());
+      Map<Person, Partition> map = {
+        for (var payment in relevantPayments) payment.person: payment
+      };
+      paymentMap.putIfAbsent(receipt, () => map);
+    }
+    return paymentMap;
   }
 
   List<Partition> getPartitionsSum(List<Person> members) {
