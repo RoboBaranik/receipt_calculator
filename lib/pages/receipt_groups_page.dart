@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
@@ -6,12 +7,14 @@ import 'package:receipt_calculator/widgets/drawer.dart';
 import 'package:receipt_calculator/widgets/receipt_groups/date.dart';
 
 class ReceiptGroupsPage extends StatefulWidget {
-  static const String route = '/groups';
-  final List<Event> groups;
-  ReceiptGroupsPage({super.key, required this.groups}) {
-    for (var group in groups) {
-      if (group.receipts.isEmpty) {
-        group.receipts.addAll([Routes.mocked1, Routes.mocked2]);
+  static const String route = 'groups';
+  final List<Event> events;
+  final List<PersonGroup> memberGroups;
+  ReceiptGroupsPage(
+      {super.key, required this.events, required this.memberGroups}) {
+    for (var event in events) {
+      if (event.receipts.isEmpty) {
+        event.receipts.addAll([Routes.mocked1, Routes.mocked2]);
       }
     }
   }
@@ -28,10 +31,13 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Receipt groups')),
-      drawer: const Drawer(
-        child: AppDrawer(currentRoute: Routes.receiptList),
-      ),
+      appBar: AppBar(
+          title: selectedTab == _ReceiptGroupsPageTab.groups
+              ? const Text('Events')
+              : const Text('Groups')),
+      // drawer: const Drawer(
+      //   child: AppDrawer(currentRoute: Routes.receiptList),
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // showDialog<Receipt>(
@@ -54,18 +60,17 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
         }),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Events'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.groups), label: 'Event members'),
+          BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'Groups'),
         ],
       ),
-      body: [groupsTab(), membersTab()][selectedTab.index],
+      body: [eventsTab(), membersTab()][selectedTab.index],
     );
   }
 
-  Widget groupsTab() {
+  Widget eventsTab() {
     return ListView.separated(
         itemBuilder: (context, index) {
-          Event event = widget.groups.elementAt(index);
+          Event event = widget.events.elementAt(index);
           String groupName =
               'Abraham Asertive, Betty Bored, Cindy Clever'; //event.group.toString();
 
@@ -73,7 +78,8 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              debugPrint('Tapped');
+              Navigator.pushNamed(context, Routes.receiptList,
+                  arguments: event);
             },
             child: Container(
               decoration: const BoxDecoration(color: Colors.white),
@@ -143,6 +149,78 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
   }
 
   Widget membersTab() {
-    return Container();
+    return ListView.separated(
+        itemBuilder: (context, index) {
+          PersonGroup group = widget.memberGroups.elementAt(index);
+          return Container(
+            decoration: const BoxDecoration(color: Colors.white),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  group.toString(),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: group.members
+                      .mapIndexed((index, member) => Container(
+                            decoration: BoxDecoration(
+                                color: Helper.colorPerPerson[index % 10]
+                                    .withOpacity(0.05),
+                                border: Border.all(
+                                    color: Helper.colorPerPerson[index % 10]
+                                        .withOpacity(0.5)),
+                                borderRadius: BorderRadius.circular(16)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 2, horizontal: 8),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.person,
+                                  color: Helper.colorPerPerson[index % 10],
+                                  shadows: const [
+                                    Shadow(color: Colors.black, blurRadius: 3)
+                                  ],
+                                ),
+                                const SizedBox(width: 4),
+                                Text(member.name)
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                ),
+                // ...group.members
+                //     .mapIndexed((index, member) => Container(
+                //           decoration: BoxDecoration(
+                //               border: Border.all(color: Colors.black12),
+                //               borderRadius: BorderRadius.circular(16)),
+                //           padding:
+                //               const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                //           child: Row(
+                //             mainAxisSize: MainAxisSize.min,
+                //             children: [
+                //               Icon(
+                //                 Icons.person,
+                //                 color: Helper.colorPerPerson[index % 10],
+                //               ),
+                //               const SizedBox(width: 4),
+                //               Text(member.name)
+                //             ],
+                //           ),
+                //         ))
+                //     .toList()
+              ],
+            ),
+          );
+        },
+        separatorBuilder: (context, index) {
+          return Container(height: 1, color: Colors.black12);
+        },
+        itemCount: widget.memberGroups.length);
   }
 }

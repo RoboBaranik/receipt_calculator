@@ -11,7 +11,7 @@ import 'package:receipt_calculator/pages/receipt_summary_page.dart';
 import 'data/receipt_item.dart';
 
 class Routes {
-  static const String receiptList = 'receipt_list';
+  static const String receiptList = '/receipt_list';
   static const String receiptSummary = '/receipt_summary';
   static const String receipt = '/receipt';
   static const String receiptCreateManual = '/receipt_create_manual';
@@ -58,8 +58,10 @@ class Routes {
             transitionsBuilder: transition);
       case ReceiptGroupsPage.route:
         return PageRouteBuilder(
-            pageBuilder: (context, _, __) =>
-                ReceiptGroupsPage(groups: [mockedEvent]),
+            pageBuilder: (context, _, __) => ReceiptGroupsPage(
+                  events: [mockedEvent],
+                  memberGroups: [mockedGroup, mockedGroup2, mockedGroup3],
+                ),
             transitionsBuilder: transition);
 
       default:
@@ -90,9 +92,18 @@ class Routes {
   static Person personC = Person('Cindy Clever');
   static Person personD = Person('DerekDetermined');
   static Person personE = Person('Eustace Exhausted');
+  static Person personA2 = Person('Jozef');
+  static Person personB2 = Person('Tomas');
+  static Person personA3 = Person('Laci');
+  static Person personB3 = Person('Feri');
+  static Person personC3 = Person('Peto');
 
   static PersonGroup mockedGroup =
       PersonGroup(members: [personA, personB, personC, personD, personE]);
+  static PersonGroup mockedGroup2 =
+      PersonGroup(members: [personA2, personB2], name: 'Partia');
+  static PersonGroup mockedGroup3 =
+      PersonGroup(members: [personA3, personB3, personC3]);
   static Event mockedEvent = Event(
     group: mockedGroup,
     created: DateTime(1998, 12, 31, 13, 50),

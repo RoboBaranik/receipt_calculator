@@ -40,10 +40,20 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
     widget.group.receipts
         .sort((a, b) => b.timeCreated.compareTo(a.timeCreated));
     return Scaffold(
-      appBar: AppBar(title: const Text('New Receipt list')),
-      drawer: const Drawer(
-        child: AppDrawer(currentRoute: Routes.receiptList),
-      ),
+      appBar: AppBar(
+          title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Event'),
+          Text(
+            '${widget.group.members.length} members, ${Helper.dateTimeToString(widget.group.timeCreated)}',
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+        ],
+      )),
+      // drawer: const Drawer(
+      //   child: AppDrawer(currentRoute: Routes.receiptList),
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog<Receipt>(
