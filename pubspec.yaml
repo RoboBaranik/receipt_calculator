@@ -42,6 +42,7 @@ dependencies:
   collection: ^1.16.0
   qr_code_scanner: ^1.0.1
   http: ^0.13.5
+  flutter_slidable: ^3.0.0
 
 dev_dependencies:
   flutter_test:

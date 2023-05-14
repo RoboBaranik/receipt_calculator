@@ -185,7 +185,7 @@ class _ReceiptCreateManualPageState extends State<ReceiptCreateManualPage> {
         name: name,
         items: items,
         timeCreated: timeCreated,
-        group: Routes.mockedGroup,
+        group: Routes.mockedEvent,
         id: '');
     Navigator.pop(context, newReceipt);
   }

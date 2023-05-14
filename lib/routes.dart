@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/pages/receipt_create_manual_page.dart';
+import 'package:receipt_calculator/pages/receipt_groups_page.dart';
 import 'package:receipt_calculator/pages/receipt_list_page.dart';
 import 'package:receipt_calculator/pages/receipt_page.dart';
 import 'package:receipt_calculator/pages/receipt_scanner_page.dart';
@@ -31,7 +32,7 @@ class Routes {
       case receiptList:
         return PageRouteBuilder(
             pageBuilder: (context, _, __) =>
-                ReceiptListPage(group: mockedGroup),
+                ReceiptListPage(group: mockedEvent),
             transitionsBuilder: transition);
       case receiptCreateManual:
         return PageRouteBuilder(
@@ -54,6 +55,11 @@ class Routes {
         return PageRouteBuilder(
             pageBuilder: (context, _, __) => ReceiptSplitPage(
                 receipt: args['receipt'], itemIndex: args['itemIndex']),
+            transitionsBuilder: transition);
+      case ReceiptGroupsPage.route:
+        return PageRouteBuilder(
+            pageBuilder: (context, _, __) =>
+                ReceiptGroupsPage(groups: [mockedEvent]),
             transitionsBuilder: transition);
 
       default:
@@ -85,14 +91,17 @@ class Routes {
   static Person personD = Person('DerekDetermined');
   static Person personE = Person('Eustace Exhausted');
 
-  static ReceiptGroup mockedGroup = ReceiptGroup(
-    members: [personA, personB, personC, personD, personE],
+  static PersonGroup mockedGroup =
+      PersonGroup(members: [personA, personB, personC, personD, personE]);
+  static Event mockedEvent = Event(
+    group: mockedGroup,
+    created: DateTime(1998, 12, 31, 13, 50),
   );
   static Receipt mocked1 = Receipt(
       id: 'empty',
       name: 'LIDL',
       timeCreated: DateTime.now(),
-      group: mockedGroup,
+      group: mockedEvent,
       items: [
         ReceiptItem(
           name: 'Ketchup',
@@ -126,7 +135,7 @@ class Routes {
       id: 'empty',
       name: 'Fresh',
       timeCreated: DateTime(2019, 9, 11, 12, 50, 0),
-      group: mockedGroup,
+      group: mockedEvent,
       items: [
         ReceiptItem(name: 'Milk', price: 4.53),
         ReceiptItem(

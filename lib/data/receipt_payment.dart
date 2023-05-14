@@ -2,15 +2,16 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 
-class ReceiptGroup {
-  final List<Person> members = [];
+class Event {
+  final PersonGroup group;
+  final List<Person> members;
   final List<Receipt> receipts = [];
-  ReceiptGroup({List<Receipt>? receipts, List<Person>? members}) {
+  final DateTime timeCreated;
+  Event({List<Receipt>? receipts, required this.group, DateTime? created})
+      : timeCreated = created ?? DateTime.now(),
+        members = group.members {
     if (receipts != null && receipts.isNotEmpty) {
       this.receipts.addAll(receipts);
-    }
-    if (members != null && members.isNotEmpty) {
-      this.members.addAll(members);
     }
   }
   get totalSum {
@@ -101,6 +102,84 @@ class ReceiptGroup {
         })
         .values
         .toList();
+  }
+
+  List<String> allStoresToString([int? maxLength]) {
+    // Join duplicate store names with prefixed multiplicator
+    List<String> storeNames = //receipts.map((receipt) => receipt.name)
+        [
+      'LIDL',
+      'Fresh',
+      'LIDL',
+      'LIDL',
+      'Tesco',
+      'Klas',
+      'Kaufland',
+      'Kaufland',
+      'Test store'
+    ]
+            .groupFoldBy((name) => name, (previous, name) {
+              if (previous == null) {
+                return 1;
+              }
+              return (previous as int) + 1;
+            })
+            .entries
+            .map((entry) =>
+                entry.value > 1 ? '${entry.value}x ${entry.key}' : entry.key)
+            .toList();
+    storeNames.sort((a, b) => a.length.compareTo(b.length));
+
+    // Return if full string is not longer than max length
+    String asString = storeNames.join(', ');
+    int overflowSuffixLength = ' and xxx more'.length;
+    if (maxLength == null ||
+        maxLength <= overflowSuffixLength ||
+        asString.length <= maxLength) {
+      return [asString];
+    }
+
+    // Append the suffix with number of stores to shorten the string
+    List<String> shortened = [''];
+    int appended = -1;
+    for (String name in storeNames) {
+      appended++;
+      if (shortened[0].isEmpty) {
+        if (name.length + overflowSuffixLength > maxLength) {
+          shortened[0] = '${storeNames.length} stores';
+          break;
+        }
+        shortened[0] = name;
+      } else {
+        if (shortened[0].length + name.length + overflowSuffixLength >
+            maxLength) {
+          shortened.add(' and ${storeNames.length - appended} more');
+          break;
+        }
+        shortened[0] += ', $name';
+      }
+    }
+    return shortened;
+  }
+}
+
+class PersonGroup {
+  final List<Person> members;
+  String name;
+  PersonGroup({required this.members, this.name = ''});
+  @override
+  String toString() {
+    if (name.isNotEmpty) {
+      return name;
+    }
+    return members
+        .map((member) => member.name)
+        .reduce((memberNames, memberName) {
+      if (memberNames.isEmpty) {
+        return memberName;
+      }
+      return '$memberNames, $memberName';
+    });
   }
 }
 

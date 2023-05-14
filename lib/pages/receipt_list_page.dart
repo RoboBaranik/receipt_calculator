@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:receipt_calculator/data/receipt_item.dart';
 import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
@@ -10,7 +11,7 @@ import '../routes.dart';
 import '../widgets/drawer.dart';
 
 class ReceiptListPage extends StatefulWidget {
-  final ReceiptGroup group;
+  final Event group;
   ReceiptListPage({super.key, required this.group}) {
     // TODO Remove later
     if (group.receipts.isEmpty) {
@@ -26,6 +27,14 @@ enum _ReceiptListPageTab { list, payments }
 
 class _ReceiptListPageState extends State<ReceiptListPage> {
   _ReceiptListPageTab selectedTab = _ReceiptListPageTab.list;
+  // List<SlidableController> listControllers = [];
+
+  void deleteReceipt(Receipt receipt) {
+    setState(() {
+      widget.group.receipts.remove(receipt);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     widget.group.receipts
@@ -56,8 +65,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
           selectedTab = _ReceiptListPageTab.values[tabIndex];
         }),
         items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.list), label: 'Receipt list'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Receipts'),
           BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'Payments'),
         ],
       ),
@@ -68,51 +76,77 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
   Widget listTab() {
     return ListView.separated(
       itemCount: widget.group.receipts.length,
-      itemBuilder: (context, index) => GestureDetector(
-        // onTap: () => Navigator.pushNamed(context, Routes.receipt,
-        //     arguments: widget.receipts[index]),
-        onTap: () => Navigator.pushNamed(context, Routes.receiptSummary,
-            arguments: widget.group.receipts[index]),
-        child: Container(
-          decoration: const BoxDecoration(color: Colors.white),
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          // height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      itemBuilder: (context, index) {
+        // SlidableController? c = Slidable.of(context);
+        // if (c != null) {
+        //   listControllers.add(c);
+        //   c.direction.addListener(() {
+        //     debugPrint('List item #$index has value ${c.direction.value}');
+        //   });
+        // }
+        return Slidable(
+          // onTap: () => Navigator.pushNamed(context, Routes.receiptSummary,
+          //     arguments: widget.group.receipts[index]),
+          closeOnScroll: false,
+          endActionPane: ActionPane(
+            motion: const BehindMotion(),
+            extentRatio: 0.2,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    // height: 16,
-                    margin: const EdgeInsets.symmetric(vertical: 2),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      widget.group.receipts[index].name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Container(
-                    // height: 16,
-                    margin: const EdgeInsets.symmetric(vertical: 2),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      Helper.dateTimeToString(
-                          widget.group.receipts[index].timeCreated),
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-                  ),
-                ],
+              SlidableAction(
+                onPressed: (context) {
+                  deleteReceipt(widget.group.receipts[index]);
+                },
+                icon: Icons.delete,
+                backgroundColor: Colors.red,
               ),
-              Text(
-                Helper.valueShortWithCurrency(widget.group.receipts[index].sum,
-                    widget.group.receipts[index].currency),
-                style: const TextStyle(fontSize: 16),
-              )
             ],
           ),
-        ),
-      ),
+          child: GestureDetector(
+            onTap: () => Navigator.pushNamed(context, Routes.receiptSummary,
+                arguments: widget.group.receipts[index]),
+            child: Container(
+              decoration: const BoxDecoration(color: Colors.white),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              // height: 64,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        // height: 16,
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          widget.group.receipts[index].name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Container(
+                        // height: 16,
+                        margin: const EdgeInsets.symmetric(vertical: 2),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          Helper.dateTimeToString(
+                              widget.group.receipts[index].timeCreated),
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    Helper.valueShortWithCurrency(
+                        widget.group.receipts[index].sum,
+                        widget.group.receipts[index].currency),
+                    style: const TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
       separatorBuilder: (context, index) => Container(
         height: 1,
         color: Colors.black12,
@@ -147,7 +181,7 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
                 hasIcon: false, tapHeaderToExpand: true),
             header: Container(
               decoration: const BoxDecoration(color: Colors.white),
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               // height: 64,
               child: Column(
                 children: [
@@ -189,50 +223,6 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
             ),
             collapsed: Container(),
             expanded: paymentDetails(member));
-        // return GestureDetector(
-        //   onTap: null,
-        //   child: Container(
-        //     decoration: const BoxDecoration(color: Colors.white),
-        //     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        //     // height: 64,
-        //     child: Column(
-        //       children: [
-        //         Row(
-        //           children: [
-        //             Icon(
-        //               Icons.person,
-        //               color: memberIconColor,
-        //               size: 35,
-        //               shadows: const [
-        //                 Shadow(color: Colors.black, blurRadius: 2)
-        //               ],
-        //             ),
-        //             const SizedBox(width: 8),
-        //             Column(
-        //               crossAxisAlignment: CrossAxisAlignment.start,
-        //               children: [
-        //                 Text(
-        //                   member.name,
-        //                   style: const TextStyle(fontWeight: FontWeight.bold),
-        //                 ),
-        //                 // const SizedBox(height: 4),
-        //                 Row(
-        //                   children: [
-        //                     totalPayIcon,
-        //                     Text(
-        //                       Helper.valueLongWithCurrency(payment.abs(), null),
-        //                       style: TextStyle(color: totalPayColor),
-        //                     ),
-        //                   ],
-        //                 ),
-        //               ],
-        //             )
-        //           ],
-        //         )
-        //       ],
-        //     ),
-        //   ),
-        // );
       },
       separatorBuilder: (context, index) => Container(
         height: 1,
@@ -264,12 +254,28 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
     debtMap.forEach((receipt, paymentMap) {
       String totalDebtForReceipt = Helper.valueLongWithCurrency(
           paymentMap.values.map((payment) => payment.payment).sum, null);
-      Widget debtItem = Row(children: [
-        Text(receipt.name, style: TextStyle(fontWeight: FontWeight.bold)),
-        Icon(Icons.keyboard_arrow_right, color: Colors.lime.shade600),
-        Text(totalDebtForReceipt,
-            style: TextStyle(color: Colors.lime.shade600)),
-      ]);
+      bool specifyStoreDate = debtMap.keys.any((receipt1) =>
+          receipt1 != receipt && receipt1.name.compareTo(receipt.name) == 0);
+      Widget debtItem = Row(
+          children: specifyStoreDate
+              ? [
+                  Text(receipt.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 4),
+                  Text(Helper.dateTimeToString(receipt.timeCreated),
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black45)),
+                  Icon(Icons.keyboard_arrow_right, color: Colors.lime.shade600),
+                  Text(totalDebtForReceipt,
+                      style: TextStyle(color: Colors.lime.shade600)),
+                ]
+              : [
+                  Text(receipt.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Icon(Icons.keyboard_arrow_right, color: Colors.lime.shade600),
+                  Text(totalDebtForReceipt,
+                      style: TextStyle(color: Colors.lime.shade600)),
+                ]);
       debtItems.add(debtItem);
       for (var payment in paymentMap.values) {
         Color memberIconColor = Colors.black;
@@ -349,4 +355,12 @@ class _ReceiptListPageState extends State<ReceiptListPage> {
     });
     return debtItems;
   }
+
+  // @override
+  // void dispose() {
+  //   for (var c in listControllers) {
+  //     c.direction.removeListener(() {});
+  //   }
+  //   super.dispose();
+  // }
 }

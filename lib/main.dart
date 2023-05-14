@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receipt_calculator/pages/receipt_groups_page.dart';
 import 'package:receipt_calculator/routes.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
         Locale('en', 'US'),
         Locale('sk', 'SK'),
       ],
-      initialRoute: Routes.receiptList,
+      initialRoute: ReceiptGroupsPage.route,
       onGenerateRoute: Routes.generateRoute,
       // home: HomePage(title: 'Flutter Demo Home Page'),
       debugShowCheckedModeBanner: false,

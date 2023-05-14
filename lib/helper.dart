@@ -38,6 +38,14 @@ class Helper {
     return DateFormat('d. MMMM y HH:mm', Helper.locale).format(time);
   }
 
+  static String dateToShortMonthString(DateTime time) {
+    return DateFormat('MMM', Helper.locale).format(time);
+  }
+
+  static String dateToShortYearString(DateTime time) {
+    return DateFormat("''yy", Helper.locale).format(time);
+  }
+
   static DateTime? jsonDateParse(String time) {
     try {
       return DateFormat('dd.MM.yyyy HH:mm:ss', Helper.locale).parse(time);

@@ -7,7 +7,7 @@ import 'package:receipt_calculator/routes.dart';
 
 class Receipt {
   final String id;
-  ReceiptGroup group;
+  Event group;
   final String name;
   String? currency;
   final DateTime timeCreated;
@@ -28,7 +28,7 @@ class Receipt {
     DateTime timeCreated = Helper.jsonDateParse(json['receipt']['issueDate']) ??
         Helper.jsonDateParse(json['receipt']['createDate']) ??
         DateTime.now();
-    ReceiptGroup group = Routes.mockedGroup;
+    Event group = Routes.mockedEvent;
     String id = json['receipt']['receiptId'] ?? '';
     List<ReceiptItem> items = (json['receipt']['items'] as List<dynamic>)
         .map((item) => ReceiptItem.fromJson(item))
