@@ -106,28 +106,29 @@ class Event {
 
   List<String> allStoresToString([int? maxLength]) {
     // Join duplicate store names with prefixed multiplicator
-    List<String> storeNames = //receipts.map((receipt) => receipt.name)
-        [
-      'LIDL',
-      'Fresh',
-      'LIDL',
-      'LIDL',
-      'Tesco',
-      'Klas',
-      'Kaufland',
-      'Kaufland',
-      'Test store'
-    ]
-            .groupFoldBy((name) => name, (previous, name) {
-              if (previous == null) {
-                return 1;
-              }
-              return (previous as int) + 1;
-            })
-            .entries
-            .map((entry) =>
-                entry.value > 1 ? '${entry.value}x ${entry.key}' : entry.key)
-            .toList();
+    List<String> storeNames = receipts
+        .map((receipt) => receipt.name)
+        //     [
+        //   'LIDL',
+        //   'Fresh',
+        //   'LIDL',
+        //   'LIDL',
+        //   'Tesco',
+        //   'Klas',
+        //   'Kaufland',
+        //   'Kaufland',
+        //   'Test store'
+        // ]
+        .groupFoldBy((name) => name, (previous, name) {
+          if (previous == null) {
+            return 1;
+          }
+          return (previous as int) + 1;
+        })
+        .entries
+        .map((entry) =>
+            entry.value > 1 ? '${entry.value}x ${entry.key}' : entry.key)
+        .toList();
     storeNames.sort((a, b) => a.length.compareTo(b.length));
 
     // Return if full string is not longer than max length
@@ -160,6 +161,12 @@ class Event {
       }
     }
     return shortened;
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return 'Event of group ${group.toString()} created in $timeCreated with ${receipts.length} receipts';
   }
 }
 

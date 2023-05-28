@@ -4,7 +4,9 @@ import 'package:receipt_calculator/data/receipt_payment.dart';
 import 'package:receipt_calculator/helper.dart';
 import 'package:receipt_calculator/routes.dart';
 import 'package:receipt_calculator/widgets/drawer.dart';
+import 'package:receipt_calculator/widgets/person_chip.dart';
 import 'package:receipt_calculator/widgets/receipt_groups/date.dart';
+import 'package:receipt_calculator/widgets/receipt_groups/dialog_event_add.dart';
 
 class ReceiptGroupsPage extends StatefulWidget {
   static const String route = 'groups';
@@ -23,16 +25,50 @@ class ReceiptGroupsPage extends StatefulWidget {
   State<ReceiptGroupsPage> createState() => _ReceiptGroupsPageState();
 }
 
-enum _ReceiptGroupsPageTab { groups, members }
+enum _ReceiptGroupsPageTab { events, members }
 
 class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
-  _ReceiptGroupsPageTab selectedTab = _ReceiptGroupsPageTab.groups;
+  _ReceiptGroupsPageTab selectedTab = _ReceiptGroupsPageTab.events;
+
+  void openEvent(Event event) {
+    Navigator.pushNamed(context, Routes.receiptList, arguments: event);
+  }
+
+  void createEvent() {
+    showDialog<PersonGroup>(
+      context: context,
+      builder: (_) => DialogEventAdd(groups: widget.memberGroups),
+    ).then((group) {
+      if (group == null) return;
+      showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1970),
+              lastDate: DateTime(3000))
+          .then((date) async {
+        if (date == null) {
+          Event createdEvent = Event(group: group);
+          widget.events.add(createdEvent);
+          setState(() {});
+          return;
+        }
+        TimeOfDay? time = await showTimePicker(
+            context: context, initialTime: TimeOfDay.now());
+        date = Helper.mergeDateAndTime(date, time);
+
+        Event createdEvent = Event(group: group, created: date);
+        widget.events.add(createdEvent);
+        setState(() {});
+      });
+      // debugPrint('Group ${group.toString()} was selected');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: selectedTab == _ReceiptGroupsPageTab.groups
+          title: selectedTab == _ReceiptGroupsPageTab.events
               ? const Text('Events')
               : const Text('Groups')),
       // drawer: const Drawer(
@@ -40,16 +76,9 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
       // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // showDialog<Receipt>(
-          //   context: context,
-          //   builder: (_) => const DialogReceiptAdd(),
-          // ).then((createdReceipt) {
-          //   if (createdReceipt != null) {
-          //     debugPrint('New receipt $createdReceipt');
-          //     widget.group.receipts.add(createdReceipt);
-          //     setState(() {});
-          //   }
-          // });
+          if (selectedTab == _ReceiptGroupsPageTab.events) {
+            createEvent();
+          }
         },
         child: const Icon(Icons.add),
       ),
@@ -71,15 +100,14 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
     return ListView.separated(
         itemBuilder: (context, index) {
           Event event = widget.events.elementAt(index);
-          String groupName =
-              'Abraham Asertive, Betty Bored, Cindy Clever'; //event.group.toString();
+          String groupName = event.group.toString();
+          // 'Abraham Asertive, Betty Bored, Cindy Clever';
 
           List<String> stores = event.allStoresToString(39);
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
-              Navigator.pushNamed(context, Routes.receiptList,
-                  arguments: event);
+              openEvent(event);
             },
             child: Container(
               decoration: const BoxDecoration(color: Colors.white),
@@ -145,7 +173,7 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
             color: Colors.black12,
           );
         },
-        itemCount: 1);
+        itemCount: widget.events.length);
   }
 
   Widget membersTab() {
@@ -167,31 +195,8 @@ class _ReceiptGroupsPageState extends State<ReceiptGroupsPage> {
                   spacing: 4,
                   runSpacing: 4,
                   children: group.members
-                      .mapIndexed((index, member) => Container(
-                            decoration: BoxDecoration(
-                                color: Helper.colorPerPerson[index % 10]
-                                    .withOpacity(0.05),
-                                border: Border.all(
-                                    color: Helper.colorPerPerson[index % 10]
-                                        .withOpacity(0.5)),
-                                borderRadius: BorderRadius.circular(16)),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 2, horizontal: 8),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.person,
-                                  color: Helper.colorPerPerson[index % 10],
-                                  shadows: const [
-                                    Shadow(color: Colors.black, blurRadius: 3)
-                                  ],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(member.name)
-                              ],
-                            ),
-                          ))
+                      .mapIndexed((index, member) =>
+                          PersonChip(index: index, member: member))
                       .toList(),
                 ),
                 // ...group.members

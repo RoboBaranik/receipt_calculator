@@ -46,6 +46,16 @@ class Helper {
     return DateFormat("''yy", Helper.locale).format(time);
   }
 
+  static DateTime mergeDateAndTime(
+      [DateTime? date, TimeOfDay? time, DateTime? defaultDate]) {
+    defaultDate ??= DateTime.now();
+    time ??= TimeOfDay.now();
+    if (date == null) {
+      return defaultDate;
+    }
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
+
   static DateTime? jsonDateParse(String time) {
     try {
       return DateFormat('dd.MM.yyyy HH:mm:ss', Helper.locale).parse(time);
